@@ -1,6 +1,16 @@
 import os
+import sys
 import json
 import asyncio
+
+# Support BOTH launch styles:
+#   python app/main.py   (path mode — script dir lands on sys.path, not repo root)
+#   python -m app.main   (module mode — repo root already on sys.path)
+if __package__ in (None, ""):
+    sys_path_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if sys_path_root not in sys.path:
+        sys.path.insert(0, sys_path_root)
+
 from contextlib import asynccontextmanager
 from typing import Dict, Any, List
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query, Body, HTTPException
