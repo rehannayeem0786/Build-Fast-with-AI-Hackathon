@@ -1,8 +1,10 @@
 import os
 import sys
+import glob
 import pptx
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
+from pptx.enum.shapes import MSO_SHAPE_TYPE
 
 R_EMBED = '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}'
 
@@ -50,15 +52,30 @@ def set_two_part_heading(shape, part1, part2, font_name='Instrument Serif', size
     r2.font.color.rgb = RGBColor(255, 210, 122)
 
 def generate_deck():
-    template_path = r'C:\Users\91984\Downloads\AI Build Challenge 2026 · Idea Deck Template.pptx'
-    pass_img_path = r'C:\Users\91984\Downloads\AIBuildChallenge2026-Rehan-Abdul-Nayeem-night-pass.png'
     out_pptx = r'C:\Users\91984\buildfastwithai\AI_Build_Challenge_2026_Idea_Deck_NexusFlow_AI.pptx'
+    # Template resolution: original download, or any "*Idea Deck Template*"
+    # in Downloads. (Rebuilding from a previously generated deck is not safe:
+    # older generations have different shape layouts.)
+    candidates = (
+        [r'C:\Users\91984\Downloads\AI Build Challenge 2026 · Idea Deck Template.pptx']
+        + glob.glob(r'C:\Users\91984\Downloads\*Idea Deck Template*.pptx')
+    )
+    template_path = next((p for p in candidates if os.path.exists(p)), None)
+    if template_path is None:
+        raise SystemExit(
+            'Official "AI Build Challenge 2026 - Idea Deck Template.pptx" not found '
+            'in Downloads. Re-download it, then rerun: python build_deck.py')
+    print(f"Using template: {template_path}")
+
+    pass_imgs = glob.glob(r'C:\Users\91984\Downloads\*night-pass*.png')
+    pass_img_path = pass_imgs[0] if pass_imgs else None
 
     prs = pptx.Presentation(template_path)
 
-    # Remove only Slide 3 (the secondary instruction slide). Keep Slide 2 for the Official Night Pass!
-    # Slide index 2 is the 3rd slide.
-    remove_slide(prs, 2)
+    # The ORIGINAL template has 10 slides (index 2 = instruction slide to drop).
+    # A previously built deck has 9 slides and must not lose another one.
+    if len(prs.slides) >= 10:
+        remove_slide(prs, 2)
 
     print(f"Active functional slides: {len(prs.slides)}")
 
@@ -86,27 +103,35 @@ def generate_deck():
     # SLIDE 2: Verified Hacker Night Pass (02 / 09)
     # ==========================================
     s2 = prs.slides[1]
-    set_para_text(s2.shapes[2], "Official Registration", 'Space Grotesk', 11.0, False, C_MUTED)
-    set_para_text(s2.shapes[5], "02 / 09", 'JetBrains Mono', 9.0, False, C_MUTED)
-    set_para_text(s2.shapes[8], "VERIFIED HACKER PASS", 'JetBrains Mono', 9.5, True, C_GOLD)
-    set_two_part_heading(s2.shapes[9], "Rehan Abdul Nayeem", "· Participant Pass", 'Instrument Serif', 42.0)
+    slide2_built = any(getattr(sh, "shape_type", None) == MSO_SHAPE_TYPE.PICTURE
+                       for sh in s2.shapes)
+    if slide2_built:
+        # Rebuild from a previously generated deck — pass slide already assembled.
+        print("Slide 2 already built — skipping pass-image assembly.")
+    else:
+        if pass_img_path is None:
+            raise SystemExit("Night-pass image not found in Downloads; cannot build slide 2.")
+        set_para_text(s2.shapes[2], "Official Registration", 'Space Grotesk', 11.0, False, C_MUTED)
+        set_para_text(s2.shapes[5], "02 / 09", 'JetBrains Mono', 9.0, False, C_MUTED)
+        set_para_text(s2.shapes[8], "VERIFIED HACKER PASS", 'JetBrains Mono', 9.5, True, C_GOLD)
+        set_two_part_heading(s2.shapes[9], "Rehan Abdul Nayeem", "· Participant Pass", 'Instrument Serif', 42.0)
 
-    # Clean up instructional text shapes on Slide 2
-    shapes_to_remove = []
-    for idx, sh in enumerate(s2.shapes):
-        if idx not in [0, 1, 2, 3, 4, 5, 8, 9]:
-            shapes_to_remove.append(sh)
+        # Clean up instructional text shapes on Slide 2
+        shapes_to_remove = []
+        for idx, sh in enumerate(s2.shapes):
+            if idx not in [0, 1, 2, 3, 4, 5, 8, 9]:
+                shapes_to_remove.append(sh)
 
-    for sh in shapes_to_remove:
-        sp_elem = sh._element
-        sp_elem.getparent().remove(sp_elem)
+        for sh in shapes_to_remove:
+            sp_elem = sh._element
+            sp_elem.getparent().remove(sp_elem)
 
-    # Add the Night Pass Image
-    img_width = Inches(8.8)
-    img_height = Inches(4.98)
-    img_left = Inches(2.26)
-    img_top = Inches(2.10)
-    s2.shapes.add_picture(pass_img_path, img_left, img_top, img_width, img_height)
+        # Add the Night Pass Image
+        img_width = Inches(8.8)
+        img_height = Inches(4.98)
+        img_left = Inches(2.26)
+        img_top = Inches(2.10)
+        s2.shapes.add_picture(pass_img_path, img_left, img_top, img_width, img_height)
 
     # ==========================================
     # SLIDE 3: 02 · The Problem (03 / 09)

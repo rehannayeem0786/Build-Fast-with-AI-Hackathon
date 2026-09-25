@@ -4,7 +4,7 @@
 
 [![Benchmark Pass Rate](https://img.shields.io/badge/Benchmark--30-30%2F30%20Contract%20Passed-3fb950?style=for-the-badge&logo=pytest)](./eval/reports/BENCHMARK_REPORT.md)
 [![Self-Healing Recovery](https://img.shields.io/badge/Self--Healing-3%2F3%20Recovered-38bdf8?style=for-the-badge)](./eval/reports/BENCHMARK_REPORT.md)
-[![Suite Speedup](https://img.shields.io/badge/Speedup-6000x%2B%20(est.%20vs%20measured)-f2b632?style=for-the-badge)](./eval/reports/BENCHMARK_REPORT.md)
+[![Suite Speedup](https://img.shields.io/badge/Speedup-4000x%2B%20(est.%20vs%20measured)-f2b632?style=for-the-badge)](./eval/reports/BENCHMARK_REPORT.md)
 [![HITL Governance](https://img.shields.io/badge/SafeGuard-Fail--Safe%20HITL%20Gate-f85149?style=for-the-badge)](./app/core/guardrail.py)
 [![MCP Transport](https://img.shields.io/badge/Transport-MCP%20stdio%20(official%20SDK)-a371f7?style=for-the-badge)](./app/mcp/server.py)
 [![Browser Engine](https://img.shields.io/badge/Browser-Playwright%20Chromium-2ea44f?style=for-the-badge)](./app/agents/browser_agent.py)
@@ -70,7 +70,7 @@
 
 | Operational Metric | Estimated Manual Baseline | NexusFlow AI (Measured) | Improvement |
 | :--- | :--- | :--- | :--- |
-| **Total time for the 30-task suite** | ~43,000s (~11.9 h) | ~7s (avg ~0.24s/task) | **~6,000x suite speedup** |
+| **Total time for the 30-task suite** | ~43,000s (~11.9 h) | 6–10s (avg ~0.2–0.35s/task) | **4,000x+ suite speedup** |
 | **Tasks passing strict contract checks** | 30 (by hand, unverified) | **30/30** (tools + status + gates + postconditions) | graded, not asserted |
 | **Selector breakage recovery** | manual re-inspection each time | **3/3 recovered** via 5-stage cascade | self-healing |
 | **High-risk actions gated** | depends on operator discipline | **7 gates fired, 0 unauthorized** | deny-by-default |
@@ -126,9 +126,42 @@ curl -X POST http://127.0.0.1:8000/api/workflow/<workflow_id>/undo
 
 | Layer | Command | What it proves |
 | :--- | :--- | :--- |
-| **Unit + integration tests (17)** | `python -m pytest tests/` | planner topology, MCP stdio roundtrip, real Chromium healing, HITL reject/timeout/modify, rollback, API endpoints |
+| **Unit + integration tests (21)** | `python -m pytest tests/` | planner topology, MCP stdio roundtrip, real Chromium healing, HITL reject/timeout/modify, rollback, LLM-planner validation (mocked), API endpoints |
 | **Benchmark-30 (contract-graded)** | `python run_eval.py` | end-to-end workflows: tools, statuses, gate decisions, MCP-verified postconditions |
 | **Live dashboard** | `python app/main.py` | human-visible demo: WebSocket traces, HITL modal, DOM mutation sandbox |
+
+---
+
+## 📂 Project Structure
+
+```
+buildfastwithai/
+├── app/
+│   ├── main.py                 # FastAPI app: REST + WebSocket + lifespan (MCP session)
+│   ├── config.py               # Settings loaded from .env (Groq / OpenRouter keys)
+│   ├── core/
+│   │   ├── planner.py          # Goal→DAG: LLM planner (Groq→OpenRouter) + heuristic engine
+│   │   ├── orchestrator.py     # Topological DAG executor, retries, HITL gate, undo log
+│   │   ├── guardrail.py        # SafeGuard 4-tier risk matrix + diff previews
+│   │   ├── telemetry.py        # JSON traces, self-healing RCA, HITL decision log
+│   │   └── models.py           # Pydantic models (DAG, steps, approvals, benchmark)
+│   ├── mcp/
+│   │   ├── server.py           # Real MCP server (official SDK, 12 tools, stdio/HTTP)
+│   │   └── client.py           # Real MCP client (handshake, tools/call, local fallback)
+│   ├── agents/
+│   │   ├── browser_agent.py    # Playwright Chromium + 5-stage self-healing cascade
+│   │   └── mcp_hub.py          # Tool implementations (CRM, billing, sheets, email)
+│   ├── mock_apps/              # Synthetic HubSpot/Stripe/Sheets + live portal DOM sandbox
+│   ├── eval/
+│   │   ├── benchmark_30.py     # 30 tasks + per-task verification contracts
+│   │   └── runner.py           # Contract grading, scripted HITL decisions, reports
+│   └── static/                 # Dashboard UI (DAG canvas, HITL modal, telemetry feed)
+├── tests/                      # 21 tests (conftest keeps them offline/deterministic)
+├── eval/reports/               # BENCHMARK_REPORT.md, summary JSON, run traces, healing memory
+├── .env                        # Your keys (gitignored) · .env.example = template
+├── Dockerfile · render.yaml    # One-click cloud deployment
+└── README.md                   # This file
+```
 
 ---
 
@@ -167,13 +200,18 @@ python app/main.py
 ```
 Open `http://127.0.0.1:8000` — enter any goal, watch the DAG execute live, flip the portal to **Mutated DOM (v2)** to trigger self-healing, approve/modify/reject HITL diffs, and inspect traces.
 
-### 5. (Optional) Enable the LLM Planner
-Keys live in **`.env`** (already present in this repo, gitignored — just paste your keys):
-```bash
-GROQ_API_KEY="gsk_..."      # primary  — get one at https://console.groq.com/keys
-OPENROUTER_API_KEY="sk-or-..."  # fallback — get one at https://openrouter.ai/settings/keys
-```
-Without keys the deterministic planner is used (zero cost); with keys, goals are decomposed by the LLM over the full MCP tool schemas — Groq first, OpenRouter as fallback, hallucinated tools rejected back to the heuristic. The benchmark always runs on the deterministic planner for reproducible contract grading.
+### 5. LLM Planner (keys already in `.env` — Groq + OpenRouter only)
+`.env` in this repo holds both keys (gitignored — never committed). Provider order and models, **each verified live against your free-tier keys**:
+
+| Order | Provider | Models tried (in order, auto-fallback on any error) | Status |
+| :--- | :--- | :--- | :--- |
+| 1 | **Groq** | `openai/gpt-oss-120b` → `openai/gpt-oss-20b` → `llama-3.3-70b-versatile` → `llama-3.1-8b-instant` | ✅ first two return 200 on your free tier |
+| 2 | **OpenRouter** | `openai/gpt-4o-mini` → `meta-llama/llama-3.3-70b-instruct` → `deepseek/deepseek-chat-v3-0324` | ✅ `gpt-4o-mini` verified on your key |
+| 3 | **Heuristic engine** | no network — deterministic intent composition, $0 | always available |
+
+- Live planning latency: **~2–4s per goal**; traces record the exact `provider:model` used (e.g. `groq:openai/gpt-oss-120b`).
+- Hallucinated tool names in LLM output are rejected and the heuristic planner takes over.
+- The **benchmark always runs on the deterministic planner** for reproducible contract grading, even with keys present (tests are offline too, via `tests/conftest.py`).
 
 ### Standalone MCP Server (for Claude Desktop, Cursor, etc.)
 ```bash
@@ -201,7 +239,7 @@ The health check is `GET /`; the dashboard, sandbox, benchmark API, and undo end
 ---
 
 ## 🤖 AI Tool & Model Disclosure
-- **Planning:** optional LLM planner over **Groq (primary: `openai/gpt-oss-120b`, Llama 3.3 fallback)** and **OpenRouter (fallback: any OpenAI-compatible model)** — both OpenAI-compatible chat-completions APIs, structured JSON, tool-schema validation. The deterministic intent-composition engine is the default fallback and is what the benchmark runs use (reproducibility).
+- **Planning:** optional LLM planner over **Groq (primary: `openai/gpt-oss-120b`, fallback `gpt-oss-20b`)** and **OpenRouter (fallback: `gpt-4o-mini`)** — both OpenAI-compatible chat-completions APIs, structured JSON, tool-schema validation. The deterministic intent-composition engine is the default fallback and is what the benchmark runs use (reproducibility).
 - **Tool standard:** Model Context Protocol (MCP) via the **official `mcp` Python SDK** — real stdio server + client handshake.
 - **Browser automation:** Playwright (headless Chromium) with accessibility-tree (`aria_snapshot`) grounding; BeautifulSoup4 only as a last-resort offline fallback (and the engine actually used is always reported).
 - **Backend & telemetry:** FastAPI, WebSockets, Pydantic v2, pytest + pytest-asyncio.

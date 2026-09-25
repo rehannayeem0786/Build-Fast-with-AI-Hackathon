@@ -1,0 +1,179 @@
+{
+  "workflow_id": "wf-09fd0853",
+  "goal": "Audit overdue invoices in Stripe, sync findings to the executive sheet, and notify the account owner by email",
+  "planner_mode": "LLM",
+  "planner_model": "groq:openai/gpt-oss-120b",
+  "start_time": 1790365746.9657993,
+  "end_time": 1790365749.9863157,
+  "total_duration_sec": 3.021,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Fetch Overdue Invoices",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_get_invoices",
+      "parameters": {
+        "status": "OVERDUE"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790365746.9667919,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790365746.9693208,
+      "duration_sec": 0.003,
+      "result": {
+        "count": 3,
+        "invoices": [
+          {
+            "id": "INV-2026-001",
+            "customer_email": "sarah.c@techcorp.io",
+            "amount_due": 4500.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-15",
+            "currency": "USD",
+            "items": [
+              "Enterprise Tier Monthly",
+              "Addon Seats x 10"
+            ]
+          },
+          {
+            "id": "INV-2026-003",
+            "customer_email": "psharma@solargrid.in",
+            "amount_due": 8900.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-10",
+            "currency": "USD",
+            "items": [
+              "IoT Gateway Connector Support"
+            ]
+          },
+          {
+            "id": "INV-2026-004",
+            "customer_email": "cbennett@cloudshield.net",
+            "amount_due": 3400.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-18",
+            "currency": "USD",
+            "items": [
+              "Cloud SOC Monitoring"
+            ]
+          }
+        ],
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Sync Overdue Invoices to Executive Sheet",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "sheets_append_row",
+      "parameters": {
+        "sheet_name": "Executive_Overdue_Invoices",
+        "row_data": {
+          "invoice_id": "${invoice.id}",
+          "customer_email": "${invoice.customer_email}",
+          "amount": "${invoice.amount}",
+          "due_date": "${invoice.due_date}",
+          "status": "${invoice.status}"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790365746.9693208,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790365746.970442,
+      "duration_sec": 0.001,
+      "result": {
+        "success": true,
+        "sheet_name": "Executive_Overdue_Invoices",
+        "row_number": 1,
+        "data": {
+          "Row": 1,
+          "invoice_id": "${invoice.id}",
+          "customer_email": "${invoice.customer_email}",
+          "amount": "${invoice.amount}",
+          "due_date": "${invoice.due_date}",
+          "status": "${invoice.status}"
+        },
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-3",
+      "name": "Prepare Reminder Payloads",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_prepare_reminder",
+      "parameters": {
+        "invoice_id": "${invoice.id}"
+      },
+      "risk_level": "MEDIUM",
+      "requires_approval": false,
+      "start_time": 1790365746.9693208,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790365747.847402,
+      "duration_sec": 0.878,
+      "result": {
+        "text": "Error executing tool billing_prepare_reminder",
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-4",
+      "name": "Notify Account Owner",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "email_send_reminder",
+      "parameters": {
+        "to_email": "${invoice.customer_email}",
+        "subject": "Overdue Invoice Reminder",
+        "body": "Dear Customer,\\n\\nOur records show that invoice ${invoice.id} for amount ${invoice.amount} is overdue since ${invoice.due_date}. Please arrange payment at your earliest convenience.\\n\\nThank you."
+      },
+      "risk_level": "CRITICAL",
+      "requires_approval": true,
+      "start_time": 1790365747.847402,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790365749.9863157,
+      "duration_sec": 2.139,
+      "result": {
+        "dispatched": true,
+        "timestamp": 1790365749.985307,
+        "message_id": "MSG-1790365749985",
+        "to": "${invoice.customer_email}",
+        "subject": "Overdue Invoice Reminder",
+        "status": "SENT_VIA_MOCK_SMTP",
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [
+    {
+      "workflow_id": "wf-09fd0853",
+      "step_id": "step-4",
+      "timestamp": 1790365749.9830372,
+      "decision": "APPROVE",
+      "diff_before": {
+        "recipient": "${invoice.customer_email}",
+        "outbox_status": "DRAFT_QUEUED"
+      },
+      "diff_after": {
+        "recipient": "${invoice.customer_email}",
+        "subject": "Overdue Invoice Reminder",
+        "outbox_status": "DISPATCHED_TO_SMTP"
+      }
+    }
+  ],
+  "cost_usd": 0.21
+}

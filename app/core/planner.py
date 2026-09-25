@@ -148,8 +148,9 @@ class GoalToDAGPlanner:
         if settings.GROQ_API_KEY:
             groq_models = list(dict.fromkeys([
                 settings.GROQ_MODEL,
-                "openai/gpt-oss-120b",       # Groq flagship (current production)
-                "llama-3.3-70b-versatile",
+                "openai/gpt-oss-120b",       # verified: free tier accepts (200)
+                "openai/gpt-oss-20b",        # verified: free tier accepts (200)
+                "llama-3.3-70b-versatile",   # other tiers / accounts
                 "llama-3.1-8b-instant",
             ]))
             providers.append((
@@ -161,8 +162,9 @@ class GoalToDAGPlanner:
         if settings.OPENROUTER_API_KEY:
             openrouter_models = list(dict.fromkeys([
                 settings.OPENROUTER_MODEL,
-                "openai/gpt-4o-mini",
-                "meta-llama/llama-3.3-70b-instruct",
+                "openai/gpt-4o-mini",                # verified: works on this key
+                "meta-llama/llama-3.3-70b-instruct",  # paid slug (free slugs 404)
+                "deepseek/deepseek-chat-v3-0324",
             ]))
             providers.append((
                 "openrouter",

@@ -10,3 +10,10 @@ services:
         value: "120"
       - key: ENVIRONMENT
         value: "production"
+      # Add your LLM keys here (or set them in the Render dashboard) so the
+      # live dashboard uses the LLM planner in the cloud. Without them the
+      # deterministic planner runs — the app works either way.
+      # - key: GROQ_API_KEY
+      #   sync: false
+      # - key: OPENROUTER_API_KEY
+      #   sync: false
