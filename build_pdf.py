@@ -294,7 +294,7 @@ def build_complete_pdf():
     c.drawString(70, 385, "MODELS & REASONING")
     c.setFont("Helvetica", 10.5)
     c.setFillColor(C_BODY)
-    c.drawString(70, 355, "• GPT-4o / Claude 3.7 for hierarchical DAG planning.")
+    c.drawString(70, 355, "• Groq (GPT-OSS 120B) + OpenRouter fallback for DAG planning.")
     c.drawString(70, 335, "• Deterministic high-speed Graph Execution Engine.")
     c.drawString(70, 315, "• Sub-second semantic element grounding.")
 

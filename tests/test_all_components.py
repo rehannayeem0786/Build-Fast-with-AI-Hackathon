@@ -309,3 +309,78 @@ async def test_undo_sheet_append():
         await mcp_client.close()
 
 
+
+# ----------------------------------------------------------------------
+# LLM planner path (Groq / OpenRouter) — mocked, no network
+# ----------------------------------------------------------------------
+def test_llm_planner_produces_validated_plan(monkeypatch):
+    """A well-formed LLM response is adopted as the plan (mode=LLM)."""
+    import json as _json
+    from app.core.planner import GoalToDAGPlanner
+    from app.config import settings
+
+    p = GoalToDAGPlanner()
+    fake_response = _json.dumps({"steps": [
+        {"id": "step-1", "name": "Fetch leads", "description": "read CRM",
+         "tool_name": "crm_get_leads", "parameters": {"min_score": 90},
+         "dependencies": []},
+        {"id": "step-2", "name": "Notify customer", "description": "email",
+         "tool_name": "email_send_reminder",
+         "parameters": {"to_email": "a@b.co", "subject": "s", "body": "b"},
+         "dependencies": ["step-1"]},
+    ]})
+    monkeypatch.setattr(p, "_call_llm", lambda prompt: fake_response)
+    monkeypatch.setattr(p, "_last_used_model", "groq:openai/gpt-oss-120b")
+    monkeypatch.setattr(settings, "GROQ_API_KEY", "test-key")
+
+    dag = p.plan_workflow("whatever the goal is")
+    assert dag.planner_mode == "LLM"
+    assert dag.planner_model == "groq:openai/gpt-oss-120b"
+    assert [s.tool_name for s in dag.steps] == ["crm_get_leads", "email_send_reminder"]
+    # Risk calibration still applies to LLM-produced steps
+    assert dag.steps[1].requires_human_approval is True
+
+
+def test_llm_planner_rejects_hallucinated_tools(monkeypatch):
+    """Unknown tool names force a safe fallback to the heuristic planner."""
+    import json as _json
+    from app.core.planner import GoalToDAGPlanner
+    from app.config import settings
+
+    p = GoalToDAGPlanner()
+    fake_response = _json.dumps({"steps": [
+        {"id": "step-1", "name": "Payroll", "description": "made up",
+         "tool_name": "run_payroll", "parameters": {}, "dependencies": []},
+    ]})
+    monkeypatch.setattr(p, "_call_llm", lambda prompt: fake_response)
+    monkeypatch.setattr(settings, "GROQ_API_KEY", "test-key")
+
+    dag = p.plan_workflow("Reconcile overdue invoices and notify the team")
+    assert dag.planner_mode == "HEURISTIC"
+    assert all(s.tool_name != "run_payroll" for s in dag.steps)
+
+
+def test_llm_planner_fenced_json_parsing():
+    """Model output wrapped in ```json fences is still parsed."""
+    from app.core.planner import GoalToDAGPlanner
+    fenced = 'Sure! Here is the plan:\n```json\n{"steps": []}\n```\nDone.'
+    assert GoalToDAGPlanner._parse_json_loosely(fenced) == {"steps": []}
+
+
+def test_force_heuristic_bypasses_llm(monkeypatch):
+    """Benchmark reproducibility switch skips the LLM even with keys set."""
+    from app.core.planner import GoalToDAGPlanner
+    from app.config import settings
+
+    p = GoalToDAGPlanner()
+    p.force_heuristic = True
+    monkeypatch.setattr(settings, "GROQ_API_KEY", "test-key")
+    # If _call_llm were invoked it would be through the network; assert none.
+    monkeypatch.setattr(
+        p, "_call_llm",
+        lambda prompt: (_ for _ in ()).throw(AssertionError("LLM called!")))
+
+    dag = p.plan_workflow("Reconcile overdue invoices and queue reminders")
+    assert dag.planner_mode == "HEURISTIC"
+
+

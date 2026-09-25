@@ -164,7 +164,7 @@ def generate_deck():
 
     # Models
     set_para_text(s5.shapes[9], "MODELS", 'JetBrains Mono', 9.5, True, C_GOLD)
-    arch_text = "GPT-4o / Claude 3.7 for topological DAG planning and semantic element grounding, paired with a deterministic sub-second graph executor."
+    arch_text = "Groq (GPT-OSS 120B / Llama 3.3) with OpenRouter fallback for topological DAG planning, paired with a deterministic sub-second graph executor."
     set_para_text(s5.shapes[10], arch_text, 'Space Grotesk', 12.0, False, C_BODY, line_spacing=1.25)
 
     # Tools & Frameworks

@@ -188,6 +188,12 @@ class BenchmarkRunner:
         self.results = []
         start_suite = time.time()
 
+        # Benchmark runs on the deterministic planner for reproducible,
+        # offline-safe contract grading — even when LLM keys are configured
+        # for live dashboard use. Restored afterwards.
+        prev_force = planner.force_heuristic
+        planner.force_heuristic = True
+
         # One MCP session for the whole suite (closed here — ownership).
         opened_mcp = not mcp_client._session_usable()
         if opened_mcp:
@@ -197,6 +203,7 @@ class BenchmarkRunner:
             for task in BENCHMARK_TASKS:
                 self.results.append(await self._run_task(task))
         finally:
+            planner.force_heuristic = prev_force
             if opened_mcp and mcp_client.connected:
                 await mcp_client.close()
             if browser_agent._page is not None:

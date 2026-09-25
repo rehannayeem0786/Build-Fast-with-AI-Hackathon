@@ -27,10 +27,10 @@ class GoalToDAGPlanner:
     Hierarchical DAG Planner.
 
     Two planning modes:
-      1. LLM PLANNER  â€” when OPENAI_API_KEY / ANTHROPIC_API_KEY is configured,
+      1. LLM PLANNER  — when GROQ_API_KEY / OPENROUTER_API_KEY is configured,
          the goal is decomposed by an LLM with full tool schemas (structured JSON
-         output, validated, risk-assessed).
-      2. HEURISTIC PLANNER â€” deterministic intent-composition engine used as
+         output, validated, risk-assessed). Groq is primary, OpenRouter fallback.
+      2. HEURISTIC PLANNER — deterministic intent-composition engine used as
          fallback (and by default in offline/demo runs). Detects operational
          intents in the goal and composes a dependency-aware plan from them,
          instead of matching a fixed set of canned scenarios.
@@ -39,6 +39,8 @@ class GoalToDAGPlanner:
     def __init__(self):
         self.last_mode: str = "HEURISTIC"
         self.last_model: Optional[str] = None
+        self.force_heuristic: bool = False    # set by benchmark for reproducibility
+        self._last_used_model: Optional[str] = None
 
     # ------------------------------------------------------------------
     # Public entry point
@@ -47,12 +49,13 @@ class GoalToDAGPlanner:
         steps: Optional[List[WorkflowStep]] = None
         self.last_mode, self.last_model = "HEURISTIC", None
 
-        if settings.OPENAI_API_KEY or settings.ANTHROPIC_API_KEY:
+        llm_configured = settings.GROQ_API_KEY or settings.OPENROUTER_API_KEY
+        if llm_configured and not self.force_heuristic:
             try:
                 steps = self._plan_with_llm(goal)
                 if steps:
                     self.last_mode = "LLM"
-                    self.last_model = settings.DEFAULT_PLANNER_MODEL
+                    self.last_model = self._last_used_model or "llm:configured"
             except Exception:
                 steps = None  # fall back to heuristic planner
 
@@ -128,44 +131,71 @@ class GoalToDAGPlanner:
         return steps or None
 
     def _call_llm(self, user_prompt: str) -> Optional[str]:
-        """Call OpenAI or Anthropic (whichever key is present). Returns raw text."""
+        """
+        Call Groq (primary) or OpenRouter (fallback) — both expose
+        OpenAI-compatible chat-completions APIs. Records which
+        provider:model produced the answer in self._last_used_model.
+        Returns raw text, or None when no provider/model succeeds.
+        """
         import httpx
         timeout = 25.0
+        messages = [
+            {"role": "system", "content": PLANNER_SYSTEM_PROMPT},
+            {"role": "user", "content": user_prompt},
+        ]
 
-        if settings.OPENAI_API_KEY:
-            resp = httpx.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={"Authorization": f"Bearer {settings.OPENAI_API_KEY}"},
-                json={
-                    "model": settings.DEFAULT_PLANNER_MODEL,
+        providers = []
+        if settings.GROQ_API_KEY:
+            groq_models = list(dict.fromkeys([
+                settings.GROQ_MODEL,
+                "openai/gpt-oss-120b",       # Groq flagship (current production)
+                "llama-3.3-70b-versatile",
+                "llama-3.1-8b-instant",
+            ]))
+            providers.append((
+                "groq",
+                "https://api.groq.com/openai/v1/chat/completions",
+                {"Authorization": f"Bearer {settings.GROQ_API_KEY}"},
+                groq_models,
+            ))
+        if settings.OPENROUTER_API_KEY:
+            openrouter_models = list(dict.fromkeys([
+                settings.OPENROUTER_MODEL,
+                "openai/gpt-4o-mini",
+                "meta-llama/llama-3.3-70b-instruct",
+            ]))
+            providers.append((
+                "openrouter",
+                "https://openrouter.ai/api/v1/chat/completions",
+                {
+                    "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
+                    "HTTP-Referer": "https://github.com/buildfastwithai/nexusflow",
+                    "X-Title": "NexusFlow AI",
+                },
+                openrouter_models,
+            ))
+
+        for provider, url, headers, models in providers:
+            for model in models:
+                payload = {
+                    "model": model,
                     "temperature": 0,
+                    "messages": messages,
                     "response_format": {"type": "json_object"},
-                    "messages": [
-                        {"role": "system", "content": PLANNER_SYSTEM_PROMPT},
-                        {"role": "user", "content": user_prompt},
-                    ],
-                },
-                timeout=timeout,
-            )
-            resp.raise_for_status()
-            return resp.json()["choices"][0]["message"]["content"]
-
-        if settings.ANTHROPIC_API_KEY:
-            resp = httpx.post(
-                "https://api.anthropic.com/v1/messages",
-                headers={"x-api-key": settings.ANTHROPIC_API_KEY,
-                         "anthropic-version": "2023-06-01"},
-                json={
-                    "model": settings.DEFAULT_PLANNER_MODEL,
-                    "max_tokens": 2000,
-                    "system": PLANNER_SYSTEM_PROMPT,
-                    "messages": [{"role": "user", "content": user_prompt}],
-                },
-                timeout=timeout,
-            )
-            resp.raise_for_status()
-            return resp.json()["content"][0]["text"]
-
+                }
+                try:
+                    resp = httpx.post(url, headers=headers, json=payload, timeout=timeout)
+                    # Some OpenRouter models reject response_format — retry without it.
+                    if resp.status_code == 400 and "response_format" in resp.text:
+                        payload.pop("response_format", None)
+                        resp = httpx.post(url, headers=headers, json=payload, timeout=timeout)
+                    resp.raise_for_status()
+                    content = resp.json()["choices"][0]["message"]["content"]
+                    if content:
+                        self._last_used_model = f"{provider}:{model}"
+                        return content
+                except Exception:
+                    continue  # try next model, then next provider
         return None
 
     @staticmethod

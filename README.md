@@ -168,11 +168,12 @@ python app/main.py
 Open `http://127.0.0.1:8000` — enter any goal, watch the DAG execute live, flip the portal to **Mutated DOM (v2)** to trigger self-healing, approve/modify/reject HITL diffs, and inspect traces.
 
 ### 5. (Optional) Enable the LLM Planner
+Keys live in **`.env`** (already present in this repo, gitignored — just paste your keys):
 ```bash
-cp .env.example .env
-# set OPENAI_API_KEY or ANTHROPIC_API_KEY in .env
+GROQ_API_KEY="gsk_..."      # primary  — get one at https://console.groq.com/keys
+OPENROUTER_API_KEY="sk-or-..."  # fallback — get one at https://openrouter.ai/settings/keys
 ```
-Without keys the deterministic planner is used (zero cost); with keys, goals are decomposed by the LLM over the full MCP tool schemas — with hallucinated tools rejected back to the heuristic.
+Without keys the deterministic planner is used (zero cost); with keys, goals are decomposed by the LLM over the full MCP tool schemas — Groq first, OpenRouter as fallback, hallucinated tools rejected back to the heuristic. The benchmark always runs on the deterministic planner for reproducible contract grading.
 
 ### Standalone MCP Server (for Claude Desktop, Cursor, etc.)
 ```bash
@@ -200,7 +201,7 @@ The health check is `GET /`; the dashboard, sandbox, benchmark API, and undo end
 ---
 
 ## 🤖 AI Tool & Model Disclosure
-- **Planning:** LLM planner via official REST APIs (gpt-4o / Anthropic models, structured JSON, tool-schema validation) — *optional*; deterministic intent-composition engine is the default fallback and is what the benchmark runs use.
+- **Planning:** optional LLM planner over **Groq (primary: `openai/gpt-oss-120b`, Llama 3.3 fallback)** and **OpenRouter (fallback: any OpenAI-compatible model)** — both OpenAI-compatible chat-completions APIs, structured JSON, tool-schema validation. The deterministic intent-composition engine is the default fallback and is what the benchmark runs use (reproducibility).
 - **Tool standard:** Model Context Protocol (MCP) via the **official `mcp` Python SDK** — real stdio server + client handshake.
 - **Browser automation:** Playwright (headless Chromium) with accessibility-tree (`aria_snapshot`) grounding; BeautifulSoup4 only as a last-resort offline fallback (and the engine actually used is always reported).
 - **Backend & telemetry:** FastAPI, WebSockets, Pydantic v2, pytest + pytest-asyncio.
