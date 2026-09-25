@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusFlow AI · Autonomous Multi-App Operations & Self-Healing Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation -->
+        <header class="top-nav">
+            <div class="brand">
+                <span class="brand-badge">PS-01 · AGENTIC OPS</span>
+                <h1 class="brand-title">NexusFlow <span class="gold-accent">AI</span></h1>
+                <span class="version-tag">v1.0.0</span>
+            </div>
+            <div class="nav-metrics">
+                <div class="metric-pill">
+                    <span class="metric-label">Engine:</span>
+                    <span class="metric-val">LLM Planner + MCP</span>
+                </div>
+                <div class="metric-pill">
+                    <span class="metric-label">Self-Healing:</span>
+                    <span class="metric-val text-emerald">Active (5-Stage)</span>
+                </div>
+                <div class="metric-pill">
+                    <span class="metric-label">SafeGuard:</span>
+                    <span class="metric-val text-gold">Fail-Safe HITL</span>
+                </div>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span id="ws-status">System Ready</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-layout">
+            <!-- Left Control & Goal Input Column -->
+            <section class="control-panel">
+                <div class="card goal-card">
+                    <div class="card-header">
+                        <span class="section-label">01 · OPERATIONAL GOAL</span>
+                        <span class="hint-text">Natural Language to DAG</span>
+                    </div>
+                    
+                    <div class="input-wrapper">
+                        <textarea id="goal-input" rows="3" placeholder="Enter high-level goal... e.g. Reconcile overdue invoices in Stripe with HubSpot leads, update tracking sheet, and queue reminder emails for approval."></textarea>
+                    </div>
+
+                    <div class="quick-prompts">
+                        <span class="quick-label">Presets:</span>
+                        <button class="chip" onclick="setGoal(1)">💳 Billing & Invoice Reconcile</button>
+                        <button class="chip" onclick="setGoal(2)">🌐 Self-Healing Portal & Lead Sync</button>
+                        <button class="chip" onclick="setGoal(3)">🚀 Enterprise CRM Deal Triage</button>
+                    </div>
+
+                    <div class="action-row">
+                        <div class="dom-toggle-wrap">
+                            <label class="toggle-label">Portal DOM:</label>
+                            <select id="dom-version-select" onchange="changeDomVersion()">
+                                <option value="v1">Standard DOM (v1)</option>
+                                <option value="v2">Mutated DOM (v2 Self-Healing Test)</option>
+                            </select>
+                        </div>
+                        <button id="execute-btn" class="btn-primary" onclick="startWorkflow()">
+                            <span class="btn-icon">⚡</span> Execute Goal
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Workflow DAG Visualizer -->
+                <div class="card dag-card">
+                    <div class="card-header">
+                        <span class="section-label">02 · EXECUTION DAG GRAPH</span>
+                        <span id="workflow-status-badge" class="badge-status">AWAITING GOAL</span>
+                    </div>
+                    <div id="dag-container" class="dag-container">
+                        <div class="empty-state">No active workflow. Enter a goal and click Execute.</div>
+                    </div>
+                </div>
+
+                <!-- Quick Benchmark Summary Card -->
+                <div class="card bench-summary-card">
+                    <div class="card-header">
+                        <span class="section-label">03 · BENCHMARK-30 EVALUATION</span>
+                        <button class="btn-secondary-sm" onclick="runBenchmarks()">Run All 30 Tests</button>
+                    </div>
+                    <div class="bench-stats-grid">
+                        <div class="b-stat">
+                            <div class="b-val" id="b-pass-rate">100%</div>
+                            <div class="b-lbl">Task Pass Rate</div>
+                        </div>
+                        <div class="b-stat">
+                            <div class="b-val text-emerald" id="b-self-healing">100%</div>
+                            <div class="b-lbl">Self-Healing Rate</div>
+                        </div>
+                        <div class="b-stat">
+                            <div class="b-val text-gold" id="b-speedup">6000x+</div>
+                            <div class="b-lbl">Suite Speedup</div>
+                        </div>
+                        <div class="b-stat">
+                            <div class="b-val" id="b-cost">$0.00</div>
+                            <div class="b-lbl">Planning Cost</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Telemetry & Trace Waterfall Column -->
+            <section class="telemetry-panel">
+                <div class="card telemetry-card">
+                    <div class="card-header">
+                        <span class="section-label">04 · REAL-TIME TRACE TELEMETRY</span>
+                        <span class="trace-id" id="active-trace-id">Trace ID: None</span>
+                    </div>
+                    <div id="telemetry-feed" class="telemetry-feed">
+                        <div class="trace-empty-state">
+                            Real-time WebSocket step execution events, tool calls, DOM grounding traces, and SafeGuard diffs will stream here live.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sandbox Portal Live Viewport -->
+                <div class="card portal-card">
+                    <div class="card-header">
+                        <span class="section-label">05 · LIVE TARGET APP SANDBOX</span>
+                        <a href="/portal" target="_blank" class="link-ext">Open in Tab ↗</a>
+                    </div>
+                    <div class="iframe-container">
+                        <iframe id="portal-frame" src="/portal"></iframe>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- SafeGuard Human-In-The-Loop Approval Modal -->
+    <div id="approval-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-badge-row">
+                    <span class="badge-critical">🛡️ SAFEGUARD HUMAN GATE</span>
+                    <span class="badge-risk" id="modal-risk-badge">RISK: CRITICAL</span>
+                </div>
+                <h2 id="modal-title">Action Approval Required</h2>
+                <p id="modal-desc">This action carries non-reversible external side-effects.</p>
+            </div>
+            
+            <div class="diff-container">
+                <div class="diff-box">
+                    <div class="diff-title text-muted">PRE-EXECUTION STATE (BEFORE)</div>
+                    <pre id="modal-diff-before">{}</pre>
+                </div>
+                <div class="diff-arrow">→</div>
+                <div class="diff-box">
+                    <div class="diff-title text-gold">STAGED PAYLOAD (AFTER)</div>
+                    <pre id="modal-diff-after">{}</pre>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-danger" onclick="submitApproval('REJECT')">✕ Reject Action</button>
+                <button class="btn-success" onclick="submitApproval('APPROVE')">✓ Authorize & Execute</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
