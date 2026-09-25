@@ -1,0 +1,128 @@
+{
+  "workflow_id": "wf-dd9f14da",
+  "goal": "Audit overdue invoices, sync findings to the executive sheet, and notify the account owner by email\"",
+  "planner_mode": "LLM",
+  "planner_model": "groq:openai/gpt-oss-120b",
+  "start_time": 1790371407.9097266,
+  "end_time": 1790371408.533932,
+  "total_duration_sec": 0.624,
+  "status": "FAILED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Fetch overdue invoices",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_get_invoices",
+      "parameters": {
+        "status": "OVERDUE"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790371407.9097266,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790371407.9097266,
+      "duration_sec": 0.0,
+      "result": {
+        "count": 3,
+        "invoices": [
+          {
+            "id": "INV-2026-001",
+            "customer_email": "sarah.c@techcorp.io",
+            "amount_due": 4500.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-15",
+            "currency": "USD",
+            "items": [
+              "Enterprise Tier Monthly",
+              "Addon Seats x 10"
+            ]
+          },
+          {
+            "id": "INV-2026-003",
+            "customer_email": "psharma@solargrid.in",
+            "amount_due": 8900.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-10",
+            "currency": "USD",
+            "items": [
+              "IoT Gateway Connector Support"
+            ]
+          },
+          {
+            "id": "INV-2026-004",
+            "customer_email": "cbennett@cloudshield.net",
+            "amount_due": 3400.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-18",
+            "currency": "USD",
+            "items": [
+              "Cloud SOC Monitoring"
+            ]
+          }
+        ],
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Read executive tracking sheet",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "sheets_get_data",
+      "parameters": {
+        "sheet_name": "Executive_Invoices"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790371407.9097266,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790371407.9097266,
+      "duration_sec": 0.0,
+      "result": {
+        "sheet": "Executive_Invoices",
+        "rows": [],
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-3",
+      "name": "Prepare reminder payloads",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_prepare_reminder",
+      "parameters": {
+        "invoice_id": "{{invoice_id}}"
+      },
+      "risk_level": "MEDIUM",
+      "requires_approval": false,
+      "start_time": 1790371407.9136627,
+      "status": "FAILED",
+      "logs": [
+        {
+          "timestamp": 1790371407.9136627,
+          "level": "WARN",
+          "message": "Attempt 1 failed (Invoice {{invoice_id}} not found.). Retrying (attempt 2/3)...",
+          "metadata": {}
+        },
+        {
+          "timestamp": 1790371408.1146555,
+          "level": "WARN",
+          "message": "Attempt 2 failed (Invoice {{invoice_id}} not found.). Retrying (attempt 3/3)...",
+          "metadata": {}
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790371408.533932,
+      "duration_sec": 0.62,
+      "result": null,
+      "error": "Invoice {{invoice_id}} not found."
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [],
+  "cost_usd": 0.25
+}

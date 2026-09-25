@@ -31,7 +31,9 @@ class MCPToolHub:
         return [
             {
                 "name": "crm_get_leads",
-                "description": "Fetch leads from CRM filtered by status or minimum lead score.",
+                "description": "Fetch leads from CRM filtered by status or minimum lead score. "
+                               "Returns {count, leads:[{id, name, email, score, status, ...}]}. "
+                               "Reference a lead later via {{<this_step_id>.result.leads[0].id}}.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -79,7 +81,9 @@ class MCPToolHub:
             },
             {
                 "name": "billing_get_invoices",
-                "description": "Query billing portal invoices by payment status (OVERDUE, PAID, PENDING).",
+                "description": "Query billing portal invoices by payment status (OVERDUE, PAID, PENDING). "
+                               "Returns {count, invoices:[{id, customer_email, amount_due, status, due_date, ...}]}. "
+                               "Reference an invoice later via {{<this_step_id>.result.invoices[0].id}}.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -112,7 +116,8 @@ class MCPToolHub:
             },
             {
                 "name": "sheets_get_data",
-                "description": "Read rows from an executive spreadsheet or tracking log.",
+                "description": "Read rows from an executive spreadsheet or tracking log. "
+                               "Returns {sheet, rows:[{Row, ...}]}.",
                 "parameters": {
                     "type": "object",
                     "properties": {

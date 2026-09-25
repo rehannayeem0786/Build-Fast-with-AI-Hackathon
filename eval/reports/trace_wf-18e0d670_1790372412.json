@@ -1,0 +1,231 @@
+{
+  "workflow_id": "wf-18e0d670",
+  "goal": "Audit overdue invoices, sync findings to the executive sheet, and notify the account owner by email",
+  "planner_mode": "LLM",
+  "planner_model": "groq:openai/gpt-oss-120b",
+  "start_time": 1790372410.4432628,
+  "end_time": 1790372412.2524362,
+  "total_duration_sec": 1.809,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Fetch overdue invoices",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_get_invoices",
+      "parameters": {
+        "status": "OVERDUE"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790372412.2259393,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790372412.2259393,
+      "duration_sec": 0.0,
+      "result": {
+        "count": 3,
+        "invoices": [
+          {
+            "id": "INV-2026-001",
+            "customer_email": "sarah.c@techcorp.io",
+            "amount_due": 4500.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-15",
+            "currency": "USD",
+            "items": [
+              "Enterprise Tier Monthly",
+              "Addon Seats x 10"
+            ]
+          },
+          {
+            "id": "INV-2026-003",
+            "customer_email": "psharma@solargrid.in",
+            "amount_due": 8900.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-10",
+            "currency": "USD",
+            "items": [
+              "IoT Gateway Connector Support"
+            ]
+          },
+          {
+            "id": "INV-2026-004",
+            "customer_email": "cbennett@cloudshield.net",
+            "amount_due": 3400.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-18",
+            "currency": "USD",
+            "items": [
+              "Cloud SOC Monitoring"
+            ]
+          }
+        ],
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Log overdue invoice to executive sheet",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "sheets_append_row",
+      "parameters": {
+        "sheet_name": "Executive Overdue Invoices",
+        "row_data": {
+          "invoice_id": "{{step-1.result.invoices[0].id}}",
+          "customer_email": "{{step-1.result.invoices[0].customer_email}}",
+          "amount_due": "{{step-1.result.invoices[0].amount_due}}",
+          "due_date": "{{step-1.result.invoices[0].due_date}}",
+          "status": "{{step-1.result.invoices[0].status}}"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790372412.2259393,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790372412.2259393,
+          "level": "INFO",
+          "message": "Dataflow resolved 5 reference(s): step-2.row_data.invoice_id='INV-2026-001', step-2.row_data.customer_email='sarah.c@techcorp.io', step-2.row_data.amount_due=4500.0, step-2.row_data.due_date='2026-09-15'",
+          "metadata": {
+            "resolved": {
+              "step-2.row_data.invoice_id": "INV-2026-001",
+              "step-2.row_data.customer_email": "sarah.c@techcorp.io",
+              "step-2.row_data.amount_due": "4500.0",
+              "step-2.row_data.due_date": "2026-09-15",
+              "step-2.row_data.status": "OVERDUE"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790372412.2259393,
+      "duration_sec": 0.0,
+      "result": {
+        "success": true,
+        "sheet_name": "Executive Overdue Invoices",
+        "row_number": 1,
+        "data": {
+          "Row": 1,
+          "invoice_id": "INV-2026-001",
+          "customer_email": "sarah.c@techcorp.io",
+          "amount_due": 4500.0,
+          "due_date": "2026-09-15",
+          "status": "OVERDUE"
+        },
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-3",
+      "name": "Prepare reminder email payload",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_prepare_reminder",
+      "parameters": {
+        "invoice_id": "{{step-1.result.invoices[0].id}}"
+      },
+      "risk_level": "MEDIUM",
+      "requires_approval": false,
+      "start_time": 1790372412.2259393,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790372412.2259393,
+          "level": "INFO",
+          "message": "Dataflow resolved 1 reference(s): step-3.invoice_id='INV-2026-001'",
+          "metadata": {
+            "resolved": {
+              "step-3.invoice_id": "INV-2026-001"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790372412.2259393,
+      "duration_sec": 0.0,
+      "result": {
+        "to_email": "sarah.c@techcorp.io",
+        "subject": "Notice: Overdue Invoice INV-2026-001 for USD 4500.0",
+        "body": "Dear Customer,\n\nThis is a notification that invoice INV-2026-001 of amount USD 4500.0 was due on 2026-09-15.\n\nPlease remit payment at your earliest convenience.\n\nBest regards,\nFinance & Operations",
+        "invoice_details": {
+          "id": "INV-2026-001",
+          "customer_email": "sarah.c@techcorp.io",
+          "amount_due": 4500.0,
+          "status": "OVERDUE",
+          "due_date": "2026-09-15",
+          "currency": "USD",
+          "items": [
+            "Enterprise Tier Monthly",
+            "Addon Seats x 10"
+          ]
+        },
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-4",
+      "name": "Send reminder email to account owner",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "email_send_reminder",
+      "parameters": {
+        "to_email": "{{step-1.result.invoices[0].customer_email}}",
+        "subject": "Overdue Invoice Reminder",
+        "body": "{{step-3.result.body}}"
+      },
+      "risk_level": "CRITICAL",
+      "requires_approval": true,
+      "start_time": 1790372412.2259393,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790372412.2259393,
+          "level": "INFO",
+          "message": "Dataflow resolved 2 reference(s): step-4.to_email='sarah.c@techcorp.io', step-4.body='Dear Customer,\\n\\nThis is a notification that invoice INV-2026-001 of amount USD 4500.0 was due on 2026-09-15.\\n\\nPlease remit payment at your earliest convenience.\\n\\nBest regards,\\nFinance & Operations'",
+          "metadata": {
+            "resolved": {
+              "step-4.to_email": "sarah.c@techcorp.io",
+              "step-4.body": "Dear Customer,\n\nThis is a notification that invoice INV-2026-001 of amount USD 4500.0 was due on 2026-09-15.\n\nPlease remit payment at your earliest convenience.\n\nBest regards,\nFinance & Operations"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790372412.2524362,
+      "duration_sec": 0.026,
+      "result": {
+        "dispatched": true,
+        "timestamp": 1790372412.2524362,
+        "message_id": "MSG-1790372412252",
+        "to": "sarah.c@techcorp.io",
+        "subject": "Overdue Invoice Reminder",
+        "status": "SENT_VIA_MOCK_SMTP",
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [
+    {
+      "workflow_id": "wf-18e0d670",
+      "step_id": "step-4",
+      "timestamp": 1790372412.2524362,
+      "decision": "APPROVE",
+      "diff_before": {
+        "recipient": "sarah.c@techcorp.io",
+        "outbox_status": "DRAFT_QUEUED"
+      },
+      "diff_after": {
+        "recipient": "sarah.c@techcorp.io",
+        "subject": "Overdue Invoice Reminder",
+        "outbox_status": "DISPATCHED_TO_SMTP"
+      }
+    }
+  ],
+  "cost_usd": 0.21
+}

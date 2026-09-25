@@ -1,0 +1,251 @@
+{
+  "workflow_id": "wf-624797ff",
+  "goal": "Reconcile overdue invoices in Stripe with HubSpot leads, update the tracking sheet, and queue reminder emails for approval",
+  "planner_mode": "LLM",
+  "planner_model": "groq:openai/gpt-oss-120b",
+  "start_time": 1790371340.6327596,
+  "end_time": 1790371341.2681205,
+  "total_duration_sec": 0.635,
+  "status": "FAILED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Fetch Overdue Invoices",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_get_invoices",
+      "parameters": {
+        "status": "OVERDUE"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790371340.6327596,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790371340.6327596,
+      "duration_sec": 0.0,
+      "result": {
+        "count": 3,
+        "invoices": [
+          {
+            "id": "INV-2026-001",
+            "customer_email": "sarah.c@techcorp.io",
+            "amount_due": 4500.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-15",
+            "currency": "USD",
+            "items": [
+              "Enterprise Tier Monthly",
+              "Addon Seats x 10"
+            ]
+          },
+          {
+            "id": "INV-2026-003",
+            "customer_email": "psharma@solargrid.in",
+            "amount_due": 8900.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-10",
+            "currency": "USD",
+            "items": [
+              "IoT Gateway Connector Support"
+            ]
+          },
+          {
+            "id": "INV-2026-004",
+            "customer_email": "cbennett@cloudshield.net",
+            "amount_due": 3400.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-18",
+            "currency": "USD",
+            "items": [
+              "Cloud SOC Monitoring"
+            ]
+          }
+        ],
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Fetch CRM Leads",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_get_leads",
+      "parameters": {},
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790371340.6327596,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790371340.6327596,
+      "duration_sec": 0.0,
+      "result": {
+        "count": 6,
+        "leads": [
+          {
+            "id": "LEAD-101",
+            "name": "Sarah Chen",
+            "email": "sarah.c@techcorp.io",
+            "company": "TechCorp",
+            "score": 88,
+            "status": "QUALIFIED",
+            "deal_value": 45000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-20"
+          },
+          {
+            "id": "LEAD-102",
+            "name": "Marcus Vance",
+            "email": "mvance@apexscale.com",
+            "company": "ApexScale",
+            "score": 94,
+            "status": "PROPOSAL_SENT",
+            "deal_value": 78000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-22"
+          },
+          {
+            "id": "LEAD-103",
+            "name": "David Kim",
+            "email": "dkim@quantumops.ai",
+            "company": "QuantumOps",
+            "score": 72,
+            "status": "CONTACTED",
+            "deal_value": 30000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-18"
+          },
+          {
+            "id": "LEAD-104",
+            "name": "Priya Sharma",
+            "email": "psharma@solargrid.in",
+            "company": "SolarGrid India",
+            "score": 96,
+            "status": "QUALIFIED",
+            "deal_value": 110000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-24"
+          },
+          {
+            "id": "LEAD-105",
+            "name": "Jason Bourne",
+            "email": "jbourne@treadstone.org",
+            "company": "Treadstone Media",
+            "score": 45,
+            "status": "COLD",
+            "deal_value": 15000,
+            "assigned_rep": "Unassigned",
+            "last_contact": "2026-08-10"
+          },
+          {
+            "id": "LEAD-106",
+            "name": "Chloe Bennett",
+            "email": "cbennett@cloudshield.net",
+            "company": "CloudShield",
+            "score": 91,
+            "status": "NEGOTIATION",
+            "deal_value": 62000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-23"
+          }
+        ],
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-3",
+      "name": "Read Tracking Sheet",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "sheets_get_data",
+      "parameters": {
+        "sheet_name": "Invoice_Reconciliation"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790371340.6327596,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790371340.6327596,
+      "duration_sec": 0.0,
+      "result": {
+        "sheet": "Invoice_Reconciliation",
+        "rows": [],
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-4",
+      "name": "Update Lead with Invoice Info",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_update_lead",
+      "parameters": {
+        "lead_id": "<lead_id>",
+        "updates": {
+          "notes": "Overdue invoice <invoice_id> amount $<amount>"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790371340.6327596,
+      "status": "FAILED",
+      "logs": [
+        {
+          "timestamp": 1790371340.6327596,
+          "level": "WARN",
+          "message": "Attempt 1 failed (Lead <lead_id> not found in CRM.). Retrying (attempt 2/3)...",
+          "metadata": {}
+        },
+        {
+          "timestamp": 1790371340.850081,
+          "level": "WARN",
+          "message": "Attempt 2 failed (Lead <lead_id> not found in CRM.). Retrying (attempt 3/3)...",
+          "metadata": {}
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790371341.2661033,
+      "duration_sec": 0.633,
+      "result": null,
+      "error": "Lead <lead_id> not found in CRM."
+    },
+    {
+      "step_id": "step-6",
+      "name": "Prepare Reminder Email Payload",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_prepare_reminder",
+      "parameters": {
+        "invoice_id": "<invoice_id>"
+      },
+      "risk_level": "MEDIUM",
+      "requires_approval": false,
+      "start_time": 1790371340.6327596,
+      "status": "FAILED",
+      "logs": [
+        {
+          "timestamp": 1790371340.6327596,
+          "level": "WARN",
+          "message": "Attempt 1 failed (Invoice <invoice_id> not found.). Retrying (attempt 2/3)...",
+          "metadata": {}
+        },
+        {
+          "timestamp": 1790371340.850081,
+          "level": "WARN",
+          "message": "Attempt 2 failed (Invoice <invoice_id> not found.). Retrying (attempt 3/3)...",
+          "metadata": {}
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790371341.2661033,
+      "duration_sec": 0.633,
+      "result": null,
+      "error": "Invoice <invoice_id> not found."
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [],
+  "cost_usd": 0.33
+}

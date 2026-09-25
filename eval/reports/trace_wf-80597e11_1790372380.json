@@ -1,0 +1,107 @@
+{
+  "workflow_id": "wf-80597e11",
+  "goal": "Charge the overdue invoice INV-2026-001 with the customer card",
+  "planner_mode": "HEURISTIC",
+  "planner_model": null,
+  "start_time": 1790372378.4298677,
+  "end_time": 1790372380.0618832,
+  "total_duration_sec": 1.632,
+  "status": "ABORTED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Query Billing Invoices",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_get_invoices",
+      "parameters": {
+        "status": "OVERDUE"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790372379.5553474,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790372379.5553474,
+      "duration_sec": 0.0,
+      "result": {
+        "count": 3,
+        "invoices": [
+          {
+            "id": "INV-2026-001",
+            "customer_email": "sarah.c@techcorp.io",
+            "amount_due": 4500.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-15",
+            "currency": "USD",
+            "items": [
+              "Enterprise Tier Monthly",
+              "Addon Seats x 10"
+            ]
+          },
+          {
+            "id": "INV-2026-003",
+            "customer_email": "psharma@solargrid.in",
+            "amount_due": 8900.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-10",
+            "currency": "USD",
+            "items": [
+              "IoT Gateway Connector Support"
+            ]
+          },
+          {
+            "id": "INV-2026-004",
+            "customer_email": "cbennett@cloudshield.net",
+            "amount_due": 3400.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-18",
+            "currency": "USD",
+            "items": [
+              "Cloud SOC Monitoring"
+            ]
+          }
+        ],
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Charge Customer Invoice",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_charge_invoice",
+      "parameters": {
+        "invoice_id": "INV-2026-001",
+        "amount": 2026.0
+      },
+      "risk_level": "CRITICAL",
+      "requires_approval": true,
+      "start_time": 1790372379.5553474,
+      "status": "RUNNING",
+      "logs": [],
+      "retries": 0
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [
+    {
+      "workflow_id": "wf-80597e11",
+      "step_id": "step-2",
+      "timestamp": 1790372380.0618832,
+      "decision": "REJECT",
+      "diff_before": {
+        "invoice_id": "INV-2026-001",
+        "status": "OVERDUE",
+        "payment_action": "PENDING"
+      },
+      "diff_after": {
+        "invoice_id": "INV-2026-001",
+        "status": "PAID",
+        "charge_amount": 2026.0,
+        "method": "card_auto"
+      }
+    }
+  ],
+  "cost_usd": 0.0
+}

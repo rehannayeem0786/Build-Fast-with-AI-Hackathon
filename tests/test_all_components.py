@@ -384,3 +384,63 @@ def test_force_heuristic_bypasses_llm(monkeypatch):
     assert dag.planner_mode == "HEURISTIC"
 
 
+# ----------------------------------------------------------------------
+# Inter-step dataflow (parameter reference resolution)
+# ----------------------------------------------------------------------
+def test_parameter_reference_resolution():
+    """Explicit {{path}}, bare-name, and inline tokens all resolve upstream."""
+    q = WorkflowStep(
+        id="step-1", name="query", description="", tool_type=ToolType.MCP_TOOL,
+        tool_name="billing_get_invoices", status=StepStatus.SUCCESS,
+        result={"count": 1, "invoices": [{"id": "INV-9", "amount_due": 42.5}]})
+    p = WorkflowStep(
+        id="step-2", name="prepare", description="", tool_type=ToolType.MCP_TOOL,
+        tool_name="billing_prepare_reminder", status=StepStatus.RUNNING,
+        parameters={
+            "invoice_id": "{{step-1.result.invoices[0].id}}",   # explicit path
+            "alt": "{{invoice_id}}",                            # bare-name safety net
+            "notes": "About <invoice_id> amount $<amount>",     # inline in text
+        })
+    dag = WorkflowDAG(workflow_id="wf-df", goal="g", steps=[q, p], total_steps=2)
+
+    resolved, mapping = orchestrator._resolve_parameters(p, dag)
+    assert resolved["invoice_id"] == "INV-9"
+    assert resolved["alt"] == "INV-9"
+    assert resolved["notes"] == "About INV-9 amount $42.5"   # amount -> amount_due
+    assert len(mapping) >= 2
+
+
+def test_unresolved_reference_fails_fast():
+    """An exact placeholder with no upstream data raises a clear error."""
+    p = WorkflowStep(
+        id="step-1", name="prepare", description="", tool_type=ToolType.MCP_TOOL,
+        tool_name="billing_prepare_reminder", status=StepStatus.RUNNING,
+        parameters={"invoice_id": "<invoice_id>"})
+    dag = WorkflowDAG(workflow_id="wf-df2", goal="g", steps=[p], total_steps=1)
+    with pytest.raises(ValueError, match="Unresolved parameter reference"):
+        orchestrator._resolve_parameters(p, dag)
+
+
+async def test_dataflow_reference_end_to_end():
+    """A plan wired with {{step-1.result...}} executes and passes the value."""
+    q = WorkflowStep(
+        id="step-1", name="Query invoices", description="", tool_type=ToolType.MCP_TOOL,
+        tool_name="billing_get_invoices", parameters={"status": "OVERDUE"},
+        dependencies=[])
+    p = WorkflowStep(
+        id="step-2", name="Prepare payload", description="", tool_type=ToolType.MCP_TOOL,
+        tool_name="billing_prepare_reminder",
+        parameters={"invoice_id": "{{step-1.result.invoices[0].id}}"},
+        dependencies=["step-1"])
+    dag = WorkflowDAG(workflow_id="wf-df3",
+                      goal="Prepare reminders for overdue invoices",
+                      steps=[q, p], total_steps=2)
+
+    res = await orchestrator.run_workflow(dag, auto_approve_all=True)
+    assert res["status"] == "COMPLETED"
+    assert p.status == StepStatus.SUCCESS
+    assert p.result["invoice_details"]["id"].startswith("INV-")
+    # The literal placeholder must be gone from the executed parameters
+    assert p.parameters["invoice_id"].startswith("INV-")
+
+

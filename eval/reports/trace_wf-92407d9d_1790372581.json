@@ -1,0 +1,154 @@
+{
+  "workflow_id": "wf-92407d9d",
+  "goal": "Recalculate lead engagement scores based on ARR tier and update top 5 CRM records.",
+  "planner_mode": "HEURISTIC",
+  "planner_model": null,
+  "start_time": 1790372581.2638245,
+  "end_time": 1790372581.2638245,
+  "total_duration_sec": 0.0,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Query CRM Leads",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_get_leads",
+      "parameters": {},
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790372581.2638245,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790372581.2638245,
+      "duration_sec": 0.0,
+      "result": {
+        "count": 6,
+        "leads": [
+          {
+            "id": "LEAD-101",
+            "name": "Sarah Chen",
+            "email": "sarah.c@techcorp.io",
+            "company": "TechCorp",
+            "score": 88,
+            "status": "QUALIFIED",
+            "deal_value": 45000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-20"
+          },
+          {
+            "id": "LEAD-102",
+            "name": "Marcus Vance",
+            "email": "mvance@apexscale.com",
+            "company": "ApexScale",
+            "score": 94,
+            "status": "PROPOSAL_SENT",
+            "deal_value": 78000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-22"
+          },
+          {
+            "id": "LEAD-103",
+            "name": "David Kim",
+            "email": "dkim@quantumops.ai",
+            "company": "QuantumOps",
+            "score": 72,
+            "status": "CONTACTED",
+            "deal_value": 30000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-18"
+          },
+          {
+            "id": "LEAD-104",
+            "name": "Priya Sharma",
+            "email": "psharma@solargrid.in",
+            "company": "SolarGrid India",
+            "score": 90,
+            "status": "QUALIFIED",
+            "deal_value": 110000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-24",
+            "notes": "Updated by NexusFlow workflow: Reassign APAC region unassigned leads to lead rep Elena Rostova with priority ta"
+          },
+          {
+            "id": "LEAD-105",
+            "name": "Jason Bourne",
+            "email": "jbourne@treadstone.org",
+            "company": "Treadstone Media",
+            "score": 45,
+            "status": "COLD",
+            "deal_value": 15000,
+            "assigned_rep": "Unassigned",
+            "last_contact": "2026-08-10"
+          },
+          {
+            "id": "LEAD-106",
+            "name": "Chloe Bennett",
+            "email": "cbennett@cloudshield.net",
+            "company": "CloudShield",
+            "score": 91,
+            "status": "NEGOTIATION",
+            "deal_value": 62000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-23"
+          }
+        ],
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Update CRM Lead Record",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_update_lead",
+      "parameters": {
+        "lead_id": "LEAD-104",
+        "updates": {
+          "notes": "Updated by NexusFlow workflow: Recalculate lead engagement scores based on ARR tier and update top 5 CRM record"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790372581.2638245,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790372581.2638245,
+      "duration_sec": 0.0,
+      "result": {
+        "success": true,
+        "lead_id": "LEAD-104",
+        "updated_lead": {
+          "id": "LEAD-104",
+          "name": "Priya Sharma",
+          "email": "psharma@solargrid.in",
+          "company": "SolarGrid India",
+          "score": 90,
+          "status": "QUALIFIED",
+          "deal_value": 110000,
+          "assigned_rep": "Elena Rostova",
+          "last_contact": "2026-09-24",
+          "notes": "Updated by NexusFlow workflow: Recalculate lead engagement scores based on ARR tier and update top 5 CRM record"
+        },
+        "before": {
+          "id": "LEAD-104",
+          "name": "Priya Sharma",
+          "email": "psharma@solargrid.in",
+          "company": "SolarGrid India",
+          "score": 90,
+          "status": "QUALIFIED",
+          "deal_value": 110000,
+          "assigned_rep": "Elena Rostova",
+          "last_contact": "2026-09-24",
+          "notes": "Updated by NexusFlow workflow: Reassign APAC region unassigned leads to lead rep Elena Rostova with priority ta"
+        },
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [],
+  "cost_usd": 0.0
+}

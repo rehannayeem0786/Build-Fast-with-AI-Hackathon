@@ -17,7 +17,8 @@
 
 - **Real MCP:** an official-SDK MCP server (12 tools) spawned as a subprocess over **stdio**, driven by a genuine MCP client (initialize handshake → `tools/list` → `tools/call`).
 - **Real browser:** a headless **Chromium (Playwright)** engine that fills forms, clicks buttons, scrapes live DOM, and self-heals through a **5-stage grounding cascade** — including accessibility-tree grounding and a persisted *learned-selector memory*.
-- **Real planning:** an optional LLM planner (OpenAI / Anthropic, structured JSON over full tool schemas) with a deterministic intent-composition fallback that plans **any** goal — never a canned script.
+- **Real planning:** an optional LLM planner (**Groq** primary → **OpenRouter** fallback, structured JSON over full tool schemas) with a deterministic intent-composition fallback that plans **any** goal — never a canned script.
+- **Real dataflow:** steps pass data to each other with references (`{{step-1.result.invoices[0].id}}`) resolved against live upstream results before execution — with implicit dependency auto-wiring so a reference can never race its source.
 - **Real safety:** a SafeGuard HITL gate with a 4-tier risk matrix, before/after JSON diffs, APPROVE / **MODIFY** / REJECT decisions, and a **fail-safe timeout that deny-defaults to REJECT** so a demo can never hang.
 - **Real accountability:** every run emits a JSON trace; mutations record **compensating actions** so any workflow can be **rolled back** with one API call.
 
@@ -107,6 +108,7 @@ Every run writes `eval/reports/trace_<workflow_id>_<ts>.json` documenting:
 - Self-healing RCA: the failed selector, which stage recovered it, the resolved element
 - Full HITL decision log (decision, diffs) — the proof that gates actually fired
 - Planner mode (`LLM` / `HEURISTIC`) and MCP transport used
+- Dataflow resolutions: every `{{step-N.result...}}` reference logged with the value it resolved to
 
 Reversible mutations (sheet appends, CRM updates) additionally record **compensating actions** — roll a whole workflow back with:
 
@@ -126,7 +128,7 @@ curl -X POST http://127.0.0.1:8000/api/workflow/<workflow_id>/undo
 
 | Layer | Command | What it proves |
 | :--- | :--- | :--- |
-| **Unit + integration tests (21)** | `python -m pytest tests/` | planner topology, MCP stdio roundtrip, real Chromium healing, HITL reject/timeout/modify, rollback, LLM-planner validation (mocked), API endpoints |
+| **Unit + integration tests (24)** | `python -m pytest tests/` | planner topology, MCP stdio roundtrip, real Chromium healing, HITL reject/timeout/modify, inter-step dataflow refs, rollback, LLM-planner validation (mocked), API endpoints |
 | **Benchmark-30 (contract-graded)** | `python run_eval.py` | end-to-end workflows: tools, statuses, gate decisions, MCP-verified postconditions |
 | **Live dashboard** | `python app/main.py` | human-visible demo: WebSocket traces, HITL modal, DOM mutation sandbox |
 
@@ -156,7 +158,7 @@ buildfastwithai/
 │   │   ├── benchmark_30.py     # 30 tasks + per-task verification contracts
 │   │   └── runner.py           # Contract grading, scripted HITL decisions, reports
 │   └── static/                 # Dashboard UI (DAG canvas, HITL modal, telemetry feed)
-├── tests/                      # 21 tests (conftest keeps them offline/deterministic)
+├── tests/                      # 24 tests (conftest keeps them offline/deterministic)
 ├── eval/reports/               # BENCHMARK_REPORT.md, summary JSON, run traces, healing memory
 ├── .env                        # Your keys (gitignored) · .env.example = template
 ├── Dockerfile · render.yaml    # One-click cloud deployment

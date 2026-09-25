@@ -19,6 +19,16 @@ Rules:
 - ids must be step-1, step-2, ... in execution order.
 - dependencies reference earlier step ids only; use [] for the first step.
 - Read-only steps first, mutations after, irreversible actions (email/charge) last.
+- Pass data between steps with references to earlier step results. NEVER write
+  placeholder text such as <invoice_id> or a bare {{invoice_id}} — always use an
+  explicit path to an earlier step:
+      "parameters": {"invoice_id": "{{step-1.result.invoices[0].id}}"}
+  Only reference steps listed earlier, and use paths exactly as the tools return
+  them (each read tool's description includes its return shape).
+- The "steps" array must contain ONLY the step objects described above — no
+  strings, no comments, no explanation entries.
+- If a step's parameters reference another step, that referenced step MUST
+  appear in its "dependencies".
 - Output JSON only. No prose, no markdown fences."""
 
 
@@ -109,6 +119,10 @@ class GoalToDAGPlanner:
         steps: List[WorkflowStep] = []
         seen_ids = set()
         for i, s in enumerate(data["steps"]):
+            if not isinstance(s, dict):
+                # Tolerate stray non-object entries (model occasionally appends
+                # a string instead of an object) — skip, never crash.
+                continue
             step_id = s.get("id") or f"step-{i + 1}"
             tool_name = s.get("tool_name", "")
             # Reject hallucinated tools — fall back to heuristic planner
@@ -383,6 +397,16 @@ class GoalToDAGPlanner:
 
         write_deps = [w.id for w in writes] or read_deps
 
+        # --- draft step: prepare reminder payload wired to the invoice read ---
+        if intents["invoices"] and intents["email"]:
+            writes.append(WorkflowStep(
+                id="step-W5", name="Prepare Reminder Payload",
+                description="Generate the reminder payload from the first overdue invoice.",
+                tool_type=ToolType.MCP_TOOL, tool_name="billing_prepare_reminder",
+                parameters={"invoice_id": "{{step-R1.result.invoices[0].id}}"},
+                dependencies=read_deps))
+            write_deps = [w.id for w in writes]
+
 
         # --- irreversible intents (always last, always behind HITL gate) ------
         if intents["charge"]:
@@ -419,12 +443,28 @@ class GoalToDAGPlanner:
                 dependencies=["step-R1"]))
 
         steps = reads + writes + criticals
-        # Renumber to step-1..N preserving dependency topology
+        # Renumber to step-1..N preserving dependency topology AND dataflow refs
         id_map = {s.id: f"step-{i + 1}" for i, s in enumerate(steps)}
         for s in steps:
             s.dependencies = [id_map[d] for d in s.dependencies if d in id_map]
+            self._rewrite_references(s.parameters, id_map)
             s.id = id_map[s.id]
         return steps
+
+    @staticmethod
+    def _rewrite_references(node: Any, id_map: Dict[str, str]) -> Any:
+        """Rewrite {{old-id.result...}} tokens after step-id renumbering."""
+        if isinstance(node, dict):
+            for k, v in node.items():
+                node[k] = GoalToDAGPlanner._rewrite_references(v, id_map)
+            return node
+        if isinstance(node, list):
+            return [GoalToDAGPlanner._rewrite_references(v, id_map) for v in node]
+        if isinstance(node, str):
+            for old, new in id_map.items():
+                node = node.replace("{{" + old + ".", "{{" + new + ".")
+            return node
+        return node
 
 
 planner = GoalToDAGPlanner()

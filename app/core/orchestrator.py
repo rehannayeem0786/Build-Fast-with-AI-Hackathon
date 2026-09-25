@@ -1,6 +1,8 @@
 import asyncio
+import json
+import re
 import time
-from typing import Dict, List, Any, Optional, Callable, Set
+from typing import Dict, List, Any, Optional, Callable, Set, Tuple
 
 from app.core.models import (
     WorkflowDAG, WorkflowStep, StepStatus, RiskLevel,
@@ -11,6 +13,17 @@ from app.core.guardrail import safeguard
 from app.mcp.client import mcp_client
 from app.agents.browser_agent import browser_agent
 from app.config import settings
+
+# Sentinel for "reference did not resolve"
+_MISSING = object()
+
+# {{step-1.result.invoices[0].id}} or {{step-1.invoices[0].id}} or bare {{invoice_id}}
+_REF_EXACT = re.compile(r"^\{\{\s*([^{}]+?)\s*\}\}$")
+_ANGLE_EXACT = re.compile(r"^<([\w.\[\]-]+)>$")
+_REF_INLINE = re.compile(r"\{\{\s*([^{}]+?)\s*\}\}")
+_ANGLE_INLINE = re.compile(r"<([\w][\w.\-]*)>")
+_PATH_RE = re.compile(r"^(step-[\w]+)(?:\.result)?(?:\.(.+))?$")
+_SCALAR = (str, int, float, bool)
 
 # Terminal step states that block dependent steps.
 BLOCKING_FAILURE_STATES = {StepStatus.FAILED, StepStatus.REJECTED, StepStatus.SKIPPED}
@@ -93,6 +106,8 @@ class WorkflowOrchestrator:
         timeout (default from settings) that auto-REJECTs to prevent hangs.
         """
         self.active_workflows[dag.workflow_id] = dag
+        # Auto-declare dependencies implied by {{step-X...}} parameter refs
+        self._wire_implicit_dependencies(dag)
         telemetry.start_trace(dag)
 
         await self.emit_event("WORKFLOW_STARTED", {
@@ -222,6 +237,189 @@ class WorkflowOrchestrator:
         }
 
     # ------------------------------------------------------------------
+    # Inter-step dataflow (parameter reference resolution)
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _walk_path(root: Any, path: str) -> Any:
+        """Walk 'invoices[0].id' style paths over a result object."""
+        cur = root
+        for token in re.findall(r"[^.\[\]]+|\[\d+\]", path):
+            if token.startswith("["):
+                if not isinstance(cur, list):
+                    return _MISSING
+                idx = int(token[1:-1])
+                if idx >= len(cur):
+                    return _MISSING
+                cur = cur[idx]
+            else:
+                if not isinstance(cur, dict) or token not in cur:
+                    return _MISSING
+                cur = cur[token]
+        return cur
+
+    @classmethod
+    def _iter_key_hits(cls, node: Any, want_keys: Set[str]):
+        """BFS for dict keys in want_keys; yields (key, value) in document order."""
+        queue = [node]
+        while queue:
+            cur = queue.pop(0)
+            if isinstance(cur, dict):
+                for k, v in cur.items():
+                    if k in want_keys:
+                        yield k, v
+                    queue.append(v)
+            elif isinstance(cur, list):
+                queue.extend(cur)
+
+    @classmethod
+    def _iter_prefix_hits(cls, node: Any, prefix: str):
+        """BFS for dict keys starting with prefix whose value is scalar."""
+        queue = [node]
+        while queue:
+            cur = queue.pop(0)
+            if isinstance(cur, dict):
+                for k, v in cur.items():
+                    if k.startswith(prefix) and isinstance(v, _SCALAR):
+                        yield k, v
+                    queue.append(v)
+            elif isinstance(cur, list):
+                queue.extend(cur)
+
+    @classmethod
+    def _find_upstream_value(
+        cls, name: str, earlier: List[Tuple[str, Any]]
+    ) -> Tuple[Optional[Any], Optional[str]]:
+        """
+        Resolve a BARE placeholder name (e.g. 'invoice_id', 'lead_id', 'amount')
+        against results of already-completed earlier steps:
+          1. exact scalar key match     (invoice_id -> key 'invoice_id')
+          2. id-container heuristic     (invoice_id -> invoices[0].id,
+                                         lead_id    -> leads[0].id)
+          3. scalar key prefix match    (amount -> amount_due)
+        """
+        # 1) exact key, scalar value
+        for src, res in earlier:
+            for k, v in cls._iter_key_hits(res, {name}):
+                if isinstance(v, _SCALAR):
+                    return v, f"{src}.{k}"
+
+        # 2) *_id -> plural/singular record container with an 'id' field
+        if name.endswith("_id"):
+            base = name[:-3]
+            containers = {base + "s", base}
+            for src, res in earlier:
+                for k, v in cls._iter_key_hits(res, containers):
+                    item, suffix = None, ""
+                    if isinstance(v, list) and v and isinstance(v[0], dict):
+                        item, suffix = v[0], "[0]"
+                    elif isinstance(v, dict):
+                        item = v
+                    if item is not None and isinstance(item.get("id"), _SCALAR):
+                        return item["id"], f"{src}.{k}{suffix}.id"
+
+        # 3) prefix match (amount -> amount_due)
+        if len(name) >= 4:
+            for src, res in earlier:
+                for k, v in cls._iter_prefix_hits(res, name):
+                    return v, f"{src}.{k}"
+        return None, None
+
+    def _resolve_parameters(
+        self, step: WorkflowStep, dag: WorkflowDAG
+    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        """
+        Replace dataflow references in step.parameters with real values from
+        earlier completed steps. Supported token forms (exact or inline):
+
+            {{step-1.result.invoices[0].id}}   explicit path (preferred)
+            {{step-1.invoices[0].id}}          shorthand ('.result' optional)
+            {{invoice_id}} / <invoice_id>       bare name -> upstream search
+
+        Returns (resolved_params, mapping_of_replacements).
+        Raises ValueError when an EXACT (whole-string) token cannot resolve —
+        such a parameter is functionally required, so failing fast with a
+        clear message beats calling the tool with a literal placeholder.
+        """
+        step_index = dag.steps.index(step)
+        earlier = [
+            (s.id, s.result)
+            for s in dag.steps[:step_index]
+            if s.status in (StepStatus.SUCCESS, StepStatus.RECOVERED, StepStatus.APPROVED)
+            and isinstance(s.result, dict)
+        ]
+        by_step = {sid: res for sid, res in earlier}
+        mapping: Dict[str, Any] = {}
+
+        def lookup(expr: str) -> Any:
+            m = _PATH_RE.match(expr.strip())
+            if m and m.group(1).startswith("step-"):
+                sid, path = m.group(1), m.group(2)
+                if sid not in by_step:
+                    return _MISSING
+                return by_step[sid] if not path else self._walk_path(by_step[sid], path)
+            # bare name -> search earlier results
+            val, _src = self._find_upstream_value(expr.strip(), earlier)
+            return _MISSING if val is None else val
+
+        def resolve(node: Any, key_path: str) -> Any:
+            if isinstance(node, dict):
+                return {k: resolve(v, f"{key_path}.{k}") for k, v in node.items()}
+            if isinstance(node, list):
+                return [resolve(v, f"{key_path}[{i}]") for i, v in enumerate(node)]
+            if not isinstance(node, str):
+                return node
+
+            # Whole string is ONE token -> return the native value (may be number/list)
+            exact = _REF_EXACT.match(node) or _ANGLE_EXACT.match(node)
+            if exact:
+                val = lookup(exact.group(1))
+                if val is _MISSING:
+                    raise ValueError(
+                        f"Unresolved parameter reference '{node}' in step "
+                        f"'{step.id}' ({key_path}): no value in completed earlier "
+                        f"steps {[sid for sid, _ in earlier] or '[]'}. Reference "
+                        f"upstream results, e.g. {{{{step-1.result.invoices[0].id}}}}."
+                    )
+                mapping[key_path] = val
+                return val
+
+            # Inline tokens inside longer text -> substitute what resolves,
+            # leave the rest untouched (cosmetic text must not kill the run).
+            def _sub(m: "re.Match") -> str:
+                val = lookup(m.group(1))
+                if val is _MISSING:
+                    return m.group(0)
+                mapping[key_path] = val
+                return json.dumps(val) if isinstance(val, (dict, list)) else str(val)
+
+            out = _REF_INLINE.sub(_sub, node)
+            return _ANGLE_INLINE.sub(_sub, out)
+
+        return resolve(step.parameters, step.id), mapping
+
+    @staticmethod
+    def _wire_implicit_dependencies(dag: WorkflowDAG) -> None:
+        """
+        Safety net for LLM plans that reference {{step-X...}} in parameters
+        but forget to declare the dependency: add the referenced earlier step
+        so it can never run in parallel with its data source.
+        """
+        order = {s.id: i for i, s in enumerate(dag.steps)}
+        for s in dag.steps:
+            try:
+                exprs = _REF_INLINE.findall(json.dumps(s.parameters))
+            except Exception:
+                continue
+            for expr in exprs:
+                m = _PATH_RE.match(expr.strip())
+                if not m:
+                    continue
+                src = m.group(1)
+                if (src in order and order[src] < order[s.id]
+                        and src not in s.dependencies):
+                    s.dependencies.append(src)
+
+    # ------------------------------------------------------------------
     # Step execution
     # ------------------------------------------------------------------
     async def _run_step(
@@ -244,13 +442,38 @@ class WorkflowOrchestrator:
 
         start_t = time.time()
 
-        # 1. SafeGuard Gate — pause for human decision on gated steps
+        # 1. Inter-step dataflow — resolve {{step-N.result...}} / <placeholder>
+        #    references BEFORE the gate so humans review resolved values.
+        try:
+            resolved, mapping = self._resolve_parameters(step, dag)
+            if mapping:
+                step.parameters = resolved
+                pretty = ", ".join(f"{k}={v!r}" for k, v in list(mapping.items())[:4])
+                telemetry.log_step_event(
+                    dag.workflow_id, step.id,
+                    f"Dataflow resolved {len(mapping)} reference(s): {pretty}",
+                    level="INFO", metadata={"resolved": {k: str(v) for k, v in mapping.items()}},
+                )
+        except ValueError as e:
+            # Unresolved required reference — fail fast, no pointless retries.
+            step.status = StepStatus.FAILED
+            step.error = str(e)
+            step.duration_ms = round((time.time() - start_t) * 1000, 2)
+            telemetry.complete_step(dag.workflow_id, step, StepStatus.FAILED, error=str(e))
+            await self.emit_event("STEP_FAILED", {
+                "workflow_id": dag.workflow_id,
+                "step_id": step.id,
+                "error": str(e),
+            })
+            return "FAILED"
+
+        # 2. SafeGuard Gate — pause for human decision on gated steps
         if step.requires_human_approval and not auto_approve_all:
             gate_result = await self._human_gate(dag, step, approval_timeout_sec)
             if gate_result in ("REJECTED", "TIMEOUT"):
                 return "ABORTED"
 
-        # 2. Execute with bounded retries (transient failure recovery)
+        # 3. Execute with bounded retries (transient failure recovery)
         last_error: Optional[Exception] = None
         for attempt in range(settings.MAX_STEP_RETRIES + 1):
             try:
