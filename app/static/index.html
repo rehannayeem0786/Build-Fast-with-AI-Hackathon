@@ -77,7 +77,10 @@
                 <div class="card dag-card">
                     <div class="card-header">
                         <span class="section-label">02 · EXECUTION DAG GRAPH</span>
-                        <span id="workflow-status-badge" class="badge-status">AWAITING GOAL</span>
+                        <div class="dag-header-actions">
+                            <button id="undo-btn" class="btn-undo hidden" onclick="undoCurrentWorkflow()">↺ Rollback (Undo)</button>
+                            <span id="workflow-status-badge" class="badge-status">AWAITING GOAL</span>
+                        </div>
                     </div>
                     <div id="dag-container" class="dag-container">
                         <div class="empty-state">No active workflow. Enter a goal and click Execute.</div>
@@ -163,8 +166,20 @@
                 </div>
             </div>
 
+            <!-- Optional Human Parameter Override -->
+            <div class="modify-container">
+                <div class="modify-toggle-bar" onclick="toggleModifySection()">
+                    <span class="modify-toggle-icon" id="modify-toggle-icon">▶</span>
+                    <span class="modify-toggle-text">Modify Parameters (Human Override)</span>
+                </div>
+                <div id="modify-editor-wrap" class="modify-editor-wrap hidden">
+                    <textarea id="modal-diff-after-edit" rows="4" placeholder="Edit JSON parameters to override execution payload..."></textarea>
+                </div>
+            </div>
+
             <div class="modal-footer">
                 <button class="btn-danger" onclick="submitApproval('REJECT')">✕ Reject Action</button>
+                <button class="btn-warning" onclick="submitApproval('MODIFY')">✏️ Modify & Authorize</button>
                 <button class="btn-success" onclick="submitApproval('APPROVE')">✓ Authorize & Execute</button>
             </div>
         </div>

@@ -1,5 +1,6 @@
 let currentWorkflowId = null;
 let currentPendingStepId = null;
+let currentApprovalRequest = null;
 let ws = null;
 
 // Preset Goals
@@ -44,7 +45,9 @@ function handleServerEvent(payload) {
             document.getElementById('workflow-status-badge').innerText = 'RUNNING';
             document.getElementById('workflow-status-badge').className = 'badge-status text-gold';
             document.getElementById('active-trace-id').innerText = `Trace: ${data.workflow_id}`;
-            appendTraceLog(`[DAG PLANNER] Workflow initialized with ${data.total_steps} execution steps.`, "INFO", timeStr);
+            const undoBtn = document.getElementById('undo-btn');
+            if (undoBtn) undoBtn.classList.add('hidden');
+            appendTraceLog(`[DAG PLANNER] Workflow initialized with ${data.total_steps} execution steps. (${data.planner_mode})`, "INFO", timeStr);
             break;
 
         case "STEP_STARTED":
@@ -60,12 +63,23 @@ function handleServerEvent(payload) {
 
         case "APPROVAL_GRANTED":
             updateStepStatus(data.step_id, 'RUNNING');
-            appendTraceLog(`[SAFEGUARD] Human approval granted for step ${data.step_id}. Resuming execution...`, "SUCCESS", timeStr);
+            appendTraceLog(`[SAFEGUARD] Human approval (${data.decision || 'GRANTED'}) for step ${data.step_id}. Resuming execution...`, "SUCCESS", timeStr);
+            break;
+
+        case "APPROVAL_TIMEOUT":
+            updateStepStatus(data.step_id, 'REJECTED');
+            document.getElementById('approval-modal').classList.add('hidden');
+            appendTraceLog(`[SAFEGUARD TIMEOUT] Fail-safe deny-by-default triggered for step ${data.step_id}. Action REJECTED.`, "ERROR", timeStr);
             break;
 
         case "STEP_COMPLETED":
             updateStepStatus(data.step_id, data.status);
             appendTraceLog(`[STEP COMPLETED] ${data.step_id} finished in ${data.duration_ms}ms (Status: ${data.status})`, data.status === 'RECOVERED' ? 'WARN' : 'SUCCESS', timeStr);
+            break;
+
+        case "STEP_SKIPPED":
+            updateStepStatus(data.step_id, 'SKIPPED');
+            appendTraceLog(`[STEP SKIPPED] ${data.step_id}: ${data.reason}`, "WARN", timeStr);
             break;
 
         case "STEP_FAILED":
@@ -74,10 +88,19 @@ function handleServerEvent(payload) {
             break;
 
         case "WORKFLOW_COMPLETED":
-            document.getElementById('workflow-status-badge').innerText = 'COMPLETED';
-            document.getElementById('workflow-status-badge').className = 'badge-status text-emerald';
+            const isSuccess = data.overall_status === 'COMPLETED';
+            document.getElementById('workflow-status-badge').innerText = data.overall_status || 'COMPLETED';
+            document.getElementById('workflow-status-badge').className = `badge-status ${isSuccess ? 'text-emerald' : 'text-crimson'}`;
             document.getElementById('execute-btn').disabled = false;
-            appendTraceLog(`[SUCCESS] Workflow finished successfully! Trace saved to ${data.trace_path}`, "SUCCESS", timeStr);
+            const uBtn = document.getElementById('undo-btn');
+            if (uBtn) uBtn.classList.remove('hidden');
+            appendTraceLog(`[WORKFLOW FINISHED] Status: ${data.overall_status}. Trace saved to ${data.trace_path || 'reports/'}`, isSuccess ? "SUCCESS" : "WARN", timeStr);
+            break;
+
+        case "WORKFLOW_UNDONE":
+            document.getElementById('workflow-status-badge').innerText = data.status || 'UNDONE';
+            document.getElementById('workflow-status-badge').className = 'badge-status text-gold';
+            appendTraceLog(`[ROLLBACK COMPENSATED] ${data.undone} actions rolled back. Status: ${data.status}`, "SUCCESS", timeStr);
             break;
     }
 }
@@ -90,6 +113,8 @@ async function startWorkflow() {
     }
 
     document.getElementById('execute-btn').disabled = true;
+    const undoBtn = document.getElementById('undo-btn');
+    if (undoBtn) undoBtn.classList.add('hidden');
     document.getElementById('telemetry-feed').innerHTML = '';
     appendTraceLog(`Planning goal: "${goal}"...`, "INFO");
 
@@ -162,13 +187,32 @@ function appendTraceLog(message, level = "INFO", timeStr = null) {
     feed.scrollTop = feed.scrollHeight;
 }
 
+function toggleModifySection() {
+    const wrap = document.getElementById('modify-editor-wrap');
+    const icon = document.getElementById('modify-toggle-icon');
+    if (wrap.classList.contains('hidden')) {
+        wrap.classList.remove('hidden');
+        icon.innerText = '▼';
+    } else {
+        wrap.classList.add('hidden');
+        icon.innerText = '▶';
+    }
+}
+
 function openApprovalModal(request) {
     currentPendingStepId = request.step_id;
+    currentApprovalRequest = request;
     document.getElementById('modal-title').innerText = request.title;
     document.getElementById('modal-desc').innerText = request.description;
     document.getElementById('modal-risk-badge').innerText = `RISK: ${request.risk_level}`;
     document.getElementById('modal-diff-before').innerText = JSON.stringify(request.diff_before, null, 2);
     document.getElementById('modal-diff-after').innerText = JSON.stringify(request.diff_after, null, 2);
+    
+    // Populate editable override payload
+    const editArea = document.getElementById('modal-diff-after-edit');
+    if (editArea) {
+        editArea.value = JSON.stringify(request.diff_after, null, 2);
+    }
     document.getElementById('approval-modal').classList.remove('hidden');
 }
 
@@ -176,15 +220,49 @@ async function submitApproval(decision) {
     document.getElementById('approval-modal').classList.add('hidden');
     if (!currentWorkflowId || !currentPendingStepId) return;
 
+    let modifiedParams = null;
+    if (decision === 'MODIFY') {
+        const editArea = document.getElementById('modal-diff-after-edit');
+        if (editArea && editArea.value) {
+            try {
+                modifiedParams = JSON.parse(editArea.value);
+            } catch (e) {
+                alert("Invalid JSON in parameter override field.");
+                return;
+            }
+        }
+    }
+
+    const payload = {
+        workflow_id: currentWorkflowId,
+        step_id: currentPendingStepId,
+        decision: decision,
+        modified_parameters: modifiedParams
+    };
+
     await fetch('/api/approval/decision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            workflow_id: currentWorkflowId,
-            step_id: currentPendingStepId,
-            decision: decision
-        })
+        body: JSON.stringify(payload)
     });
+}
+
+async function undoCurrentWorkflow() {
+    if (!currentWorkflowId) return;
+    appendTraceLog(`Initiating rollback for workflow ${currentWorkflowId}...`, "INFO");
+    try {
+        const res = await fetch(`/api/workflow/${currentWorkflowId}/undo`, { method: 'POST' });
+        const result = await res.json();
+        if (result.status === 'NOTHING_TO_UNDO') {
+            appendTraceLog(`No reversible compensating actions found for ${currentWorkflowId}.`, "WARN");
+        } else {
+            appendTraceLog(`Rollback completed: ${result.undone} actions compensated successfully.`, "SUCCESS");
+            document.getElementById('workflow-status-badge').innerText = 'ROLLED_BACK';
+            document.getElementById('workflow-status-badge').className = 'badge-status text-gold';
+        }
+    } catch (err) {
+        appendTraceLog(`Error during rollback: ${err}`, "ERROR");
+    }
 }
 
 async function changeDomVersion() {

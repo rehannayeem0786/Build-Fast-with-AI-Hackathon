@@ -1,0 +1,51 @@
+{
+  "workflow_id": "wf-9c9f85b6",
+  "goal": "Navigate to web portal, scrape hardware inventory pricing table, and format JSON records.",
+  "planner_mode": "HEURISTIC",
+  "planner_model": null,
+  "start_time": 1790367847.2994816,
+  "end_time": 1790367848.0918937,
+  "total_duration_sec": 0.792,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Scrape Portal Data Table",
+      "tool_type": "BROWSER",
+      "tool_name": "scrape_table",
+      "parameters": {
+        "table_selector": "#portal-data-table"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790367847.2994816,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790367848.0918937,
+      "duration_sec": 0.792,
+      "result": {
+        "rows": [
+          {
+            "SKU ID": "SKU-8812",
+            "Product Title": "Industrial Optical Sensor Hub",
+            "Inventory Status": "In Stock",
+            "Price": "$1,450.00"
+          },
+          {
+            "SKU ID": "SKU-8813",
+            "Product Title": "Edge Compute Node A100",
+            "Inventory Status": "Low Stock (2 remaining)",
+            "Price": "$9,800.00"
+          }
+        ],
+        "count": 2,
+        "engine": "PLAYWRIGHT"
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [],
+  "cost_usd": 0.0
+}

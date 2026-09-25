@@ -1,0 +1,155 @@
+{
+  "workflow_id": "wf-ea162425",
+  "goal": "Locate and trigger synchronization action on portal despite simulated cookie banner layout shift.",
+  "planner_mode": "HEURISTIC",
+  "planner_model": null,
+  "start_time": 1790367850.0210564,
+  "end_time": 1790367850.8505,
+  "total_duration_sec": 0.829,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Scrape Portal Data Table",
+      "tool_type": "BROWSER",
+      "tool_name": "scrape_table",
+      "parameters": {
+        "table_selector": "#portal-data-table"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790367850.0210564,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790367850.760697,
+      "duration_sec": 0.74,
+      "result": {
+        "rows": [
+          {
+            "SKU ID": "SKU-8812",
+            "Product Title": "Industrial Optical Sensor Hub",
+            "Inventory Status": "In Stock",
+            "Price": "$1,450.00"
+          },
+          {
+            "SKU ID": "SKU-8813",
+            "Product Title": "Edge Compute Node A100",
+            "Inventory Status": "Low Stock (2 remaining)",
+            "Price": "$9,800.00"
+          }
+        ],
+        "count": 2,
+        "engine": "PLAYWRIGHT"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Update Tracking Sheet",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "sheets_append_row",
+      "parameters": {
+        "sheet_name": "Executive Ops Summary",
+        "row_data": {
+          "Account": "SolarGrid India",
+          "Region": "APAC",
+          "ARR": 8900.0,
+          "Health": "Amber",
+          "Action Required": "Auto: Locate and trigger synchronization action on por"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790367850.760697,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790367850.7646394,
+      "duration_sec": 0.004,
+      "result": {
+        "success": true,
+        "sheet_name": "Executive Ops Summary",
+        "row_number": 8,
+        "data": {
+          "Row": 8,
+          "Account": "SolarGrid India",
+          "Region": "APAC",
+          "ARR": 8900.0,
+          "Health": "Amber",
+          "Action Required": "Auto: Locate and trigger synchronization action on por"
+        },
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-3",
+      "name": "Submit Web Portal Form",
+      "tool_type": "BROWSER",
+      "tool_name": "fill_form_and_click",
+      "parameters": {
+        "form_data": {
+          "company_name": "SolarGrid India",
+          "contact_email": "psharma@solargrid.in"
+        },
+        "target_button_selector": "#submit-lead-btn",
+        "semantic_intent": "Submit Lead Sync"
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790367850.760697,
+      "status": "RECOVERED",
+      "logs": [
+        {
+          "timestamp": 1790367850.8011932,
+          "level": "INFO",
+          "message": "Stage 0 (Learned Memory): resolved 'text=Confirm & Synchronize Record' from previous self-heal.",
+          "metadata": {}
+        },
+        {
+          "timestamp": 1790367850.8011932,
+          "level": "SUCCESS",
+          "message": "[RECOVERED] Self-healing succeeded using LEARNED_MEMORY -> text=Confirm & Synchronize Record",
+          "metadata": {}
+        }
+      ],
+      "retries": 1,
+      "end_time": 1790367850.8505,
+      "duration_sec": 0.09,
+      "result": {
+        "success": true,
+        "self_healed": true,
+        "strategy": "LEARNED_MEMORY",
+        "engine": "PLAYWRIGHT",
+        "executed_selector": "text=Confirm & Synchronize Record",
+        "filled_fields": [
+          "company_name",
+          "contact_email"
+        ],
+        "clicked": true,
+        "click_error": null,
+        "dom_feedback": "Lead Submitted Successfully to Pipeline!",
+        "submitted_payload": {
+          "company_name": "SolarGrid India",
+          "contact_email": "psharma@solargrid.in"
+        },
+        "result_message": "Lead record submitted via real Chromium click."
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [
+    {
+      "workflow_id": "wf-ea162425",
+      "step_id": "step-3",
+      "timestamp": 1790367850.8011932,
+      "failed_selector": "#submit-lead-btn",
+      "recovery_strategy": "LEARNED_MEMORY",
+      "recovered_selector": "text=Confirm & Synchronize Record",
+      "details": "Target button resolved via LEARNED_MEMORY from semantic intent 'Submit Lead Sync'. Engine: PLAYWRIGHT."
+    }
+  ],
+  "hitl_events": [],
+  "cost_usd": 0.0
+}
