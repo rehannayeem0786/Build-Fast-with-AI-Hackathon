@@ -182,6 +182,23 @@ python -m app.mcp.server --http 8765  # streamable HTTP
 
 ---
 
+## ☁️ Deploy (submission requires a live link)
+
+**Option A · Render (free tier, uses the included `render.yaml`)**
+1. Push this repo to GitHub: `git remote add origin <your-url> && git push -u origin main`
+2. On [render.com](https://render.com) → **New → Blueprint** → select the repo (it reads `render.yaml`)
+3. Deploy — the Docker build installs Chromium automatically; open the generated `onrender.com` URL
+
+**Option B · any Docker host**
+```bash
+docker build -t nexusflow-ai .
+docker run -p 8000:8000 nexusflow-ai
+```
+
+The health check is `GET /`; the dashboard, sandbox, benchmark API, and undo endpoint are all served from the same process.
+
+---
+
 ## 🤖 AI Tool & Model Disclosure
 - **Planning:** LLM planner via official REST APIs (gpt-4o / Anthropic models, structured JSON, tool-schema validation) — *optional*; deterministic intent-composition engine is the default fallback and is what the benchmark runs use.
 - **Tool standard:** Model Context Protocol (MCP) via the **official `mcp` Python SDK** — real stdio server + client handshake.

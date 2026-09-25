@@ -1,0 +1,12 @@
+# Render.com one-click deployment for NexusFlow AI
+services:
+  - type: web
+    name: nexusflow-ai
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: APPROVAL_TIMEOUT_SEC
+        value: "120"
+      - key: ENVIRONMENT
+        value: "production"

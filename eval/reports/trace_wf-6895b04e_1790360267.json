@@ -1,0 +1,174 @@
+{
+  "workflow_id": "wf-6895b04e",
+  "goal": "Fetch top-tier qualified leads with score >= 90 from CRM, create enterprise deal, sync to executive sheet, and dispatch contract notice",
+  "planner_mode": "HEURISTIC",
+  "planner_model": null,
+  "start_time": 1790360266.140357,
+  "end_time": 1790360267.3107939,
+  "total_duration_sec": 1.17,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Query CRM Leads",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_get_leads",
+      "parameters": {
+        "min_score": 90
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790360267.2924707,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790360267.2924707,
+      "duration_sec": 0.0,
+      "result": {
+        "count": 3,
+        "leads": [
+          {
+            "id": "LEAD-102",
+            "name": "Marcus Vance",
+            "email": "mvance@apexscale.com",
+            "company": "ApexScale",
+            "score": 94,
+            "status": "PROPOSAL_SENT",
+            "deal_value": 78000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-22"
+          },
+          {
+            "id": "LEAD-104",
+            "name": "Priya Sharma",
+            "email": "psharma@solargrid.in",
+            "company": "SolarGrid India",
+            "score": 96,
+            "status": "QUALIFIED",
+            "deal_value": 110000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-24"
+          },
+          {
+            "id": "LEAD-106",
+            "name": "Chloe Bennett",
+            "email": "cbennett@cloudshield.net",
+            "company": "CloudShield",
+            "score": 91,
+            "status": "NEGOTIATION",
+            "deal_value": 62000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-23"
+          }
+        ],
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Create Enterprise Deal",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_create_deal",
+      "parameters": {
+        "lead_id": "LEAD-104",
+        "title": "Enterprise Deal for LEAD-104",
+        "amount": 90.0,
+        "stage": "Contract Review"
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790360267.2924707,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790360267.3095744,
+      "duration_sec": 0.017,
+      "result": {
+        "success": true,
+        "deal": {
+          "id": "DEAL-504",
+          "lead_id": "LEAD-104",
+          "title": "Enterprise Deal for LEAD-104",
+          "amount": 90.0,
+          "stage": "Contract Review",
+          "probability": 0.5,
+          "close_date": "2026-10-30"
+        },
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-3",
+      "name": "Update Tracking Sheet",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "sheets_append_row",
+      "parameters": {
+        "sheet_name": "Executive Ops Summary",
+        "row_data": {
+          "Account": "SolarGrid India",
+          "Region": "APAC",
+          "ARR": 90.0,
+          "Health": "Amber",
+          "Action Required": "Auto: Fetch top-tier qualified leads with score >= 90 "
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790360267.2924707,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790360267.3095744,
+      "duration_sec": 0.017,
+      "result": {
+        "success": true,
+        "sheet_name": "Executive Ops Summary",
+        "row_number": 4,
+        "data": {
+          "Row": 4,
+          "Account": "SolarGrid India",
+          "Region": "APAC",
+          "ARR": 90.0,
+          "Health": "Amber",
+          "Action Required": "Auto: Fetch top-tier qualified leads with score >= 90 "
+        },
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-4",
+      "name": "Dispatch Outbound Email",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "email_send_reminder",
+      "parameters": {
+        "to_email": "psharma@solargrid.in",
+        "subject": "NexusFlow Notice regarding INV-2026-003",
+        "body": "Operational notice generated for goal: Fetch top-tier qualified leads with score >= 90 from CRM, create enterprise deal, sync to executive sheet, and dispatch contract notice"
+      },
+      "risk_level": "CRITICAL",
+      "requires_approval": true,
+      "start_time": 1790360267.3095744,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790360267.3107939,
+      "duration_sec": 0.001,
+      "result": {
+        "dispatched": true,
+        "timestamp": 1790360267.3107939,
+        "message_id": "MSG-1790360267310",
+        "to": "psharma@solargrid.in",
+        "subject": "NexusFlow Notice regarding INV-2026-003",
+        "status": "SENT_VIA_MOCK_SMTP",
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [],
+  "cost_usd": 0.0
+}
