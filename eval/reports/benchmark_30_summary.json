@@ -7,15 +7,15 @@
   "self_healed_count": 3,
   "self_healing_success_rate_pct": 100.0,
   "hitl_gates_observed": 7,
-  "total_agent_time_sec": 6.064,
-  "avg_agent_time_sec": 0.202,
+  "total_agent_time_sec": 6.104,
+  "avg_agent_time_sec": 0.203,
   "total_simulated_manual_time_sec": 43000,
-  "average_speedup_factor": 7091.0,
+  "average_speedup_factor": 7044.6,
   "total_llm_cost_usd": 0.0,
   "planner_mode": "HEURISTIC",
   "mcp_transport": "MCP_STDIO",
   "browser_engine": "PLAYWRIGHT",
-  "suite_wall_clock_sec": 8.38,
+  "suite_wall_clock_sec": 8.33,
   "results": [
     {
       "test_id": "BENCH-01",
@@ -28,11 +28,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.008,
+      "execution_time_sec": 0.0049,
       "simulated_manual_time_sec": 1800.0,
-      "speedup_factor": 225000.0,
+      "speedup_factor": 367346.9,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-9008ec9f_1790372581.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-75213a96_1790410278.json",
       "notes": ""
     },
     {
@@ -46,11 +46,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.0048,
+      "execution_time_sec": 0.002,
       "simulated_manual_time_sec": 1200.0,
-      "speedup_factor": 250000.0,
+      "speedup_factor": 600000.0,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-129e91f7_1790372581.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-d2876a1b_1790410278.json",
       "notes": ""
     },
     {
@@ -64,11 +64,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": true,
-      "execution_time_sec": 0.0365,
+      "execution_time_sec": 0.0292,
       "simulated_manual_time_sec": 1500.0,
-      "speedup_factor": 41095.9,
+      "speedup_factor": 51369.9,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-5bda6c15_1790372581.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-c0da2433_1790410278.json",
       "notes": ""
     },
     {
@@ -82,11 +82,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.0057,
+      "execution_time_sec": 0.0181,
       "simulated_manual_time_sec": 900.0,
-      "speedup_factor": 157894.7,
+      "speedup_factor": 49723.8,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-1cb07fae_1790372581.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-2b5dc351_1790410278.json",
       "notes": ""
     },
     {
@@ -100,11 +100,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.0098,
+      "execution_time_sec": 0.0158,
       "simulated_manual_time_sec": 2100.0,
-      "speedup_factor": 214285.7,
+      "speedup_factor": 132911.4,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-92407d9d_1790372581.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-b339d379_1790410278.json",
       "notes": ""
     },
     {
@@ -118,11 +118,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.0128,
+      "execution_time_sec": 0.0157,
       "simulated_manual_time_sec": 1600.0,
-      "speedup_factor": 125000.0,
+      "speedup_factor": 101910.8,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-c29613de_1790372581.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-e1635270_1790410278.json",
       "notes": ""
     },
     {
@@ -136,11 +136,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.8044,
+      "execution_time_sec": 0.7798,
       "simulated_manual_time_sec": 2400.0,
-      "speedup_factor": 2983.6,
+      "speedup_factor": 3077.7,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-0da8718a_1790372582.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-0b966694_1790410278.json",
       "notes": ""
     },
     {
@@ -154,11 +154,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": true,
-      "execution_time_sec": 0.0393,
+      "execution_time_sec": 0.026,
       "simulated_manual_time_sec": 1200.0,
-      "speedup_factor": 30534.4,
+      "speedup_factor": 46153.8,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-6321e32f_1790372582.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-b92e1eba_1790410279.json",
       "notes": ""
     },
     {
@@ -172,11 +172,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.0096,
+      "execution_time_sec": 0.008,
       "simulated_manual_time_sec": 1800.0,
-      "speedup_factor": 187500.0,
+      "speedup_factor": 225000.0,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-f215e869_1790372582.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-bcbf7cd0_1790410279.json",
       "notes": ""
     },
     {
@@ -190,11 +190,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.004,
+      "execution_time_sec": 0.0093,
       "simulated_manual_time_sec": 1500.0,
-      "speedup_factor": 375000.0,
+      "speedup_factor": 161290.3,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-e2fbf09e_1790372582.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-45a43608_1790410279.json",
       "notes": ""
     },
     {
@@ -208,11 +208,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.0084,
+      "execution_time_sec": 0.0061,
       "simulated_manual_time_sec": 2000.0,
-      "speedup_factor": 238095.2,
+      "speedup_factor": 327868.9,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-23274cba_1790372582.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-fccd42eb_1790410279.json",
       "notes": ""
     },
     {
@@ -226,11 +226,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.0033,
+      "execution_time_sec": 0.0058,
       "simulated_manual_time_sec": 1800.0,
-      "speedup_factor": 545454.5,
+      "speedup_factor": 310344.8,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-72e20996_1790372582.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-1a984e4e_1790410279.json",
       "notes": ""
     },
     {
@@ -244,11 +244,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.6967,
+      "execution_time_sec": 0.8026,
       "simulated_manual_time_sec": 900.0,
-      "speedup_factor": 1291.8,
+      "speedup_factor": 1121.4,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-b78b78b3_1790372582.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-1204185c_1790410279.json",
       "notes": ""
     },
     {
@@ -262,11 +262,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.9069,
+      "execution_time_sec": 0.8629,
       "simulated_manual_time_sec": 600.0,
-      "speedup_factor": 661.6,
+      "speedup_factor": 695.3,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-c993e46b_1790372583.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-7bbf120e_1790410280.json",
       "notes": ""
     },
     {
@@ -280,11 +280,11 @@
       "self_healing_triggered": true,
       "self_healing_recovered": true,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.8845,
+      "execution_time_sec": 0.8916,
       "simulated_manual_time_sec": 900.0,
-      "speedup_factor": 1017.5,
+      "speedup_factor": 1009.4,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-bed51b46_1790372584.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-886b4be6_1790410281.json",
       "notes": ""
     },
     {
@@ -298,11 +298,11 @@
       "self_healing_triggered": true,
       "self_healing_recovered": true,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.82,
+      "execution_time_sec": 0.7903,
       "simulated_manual_time_sec": 1100.0,
-      "speedup_factor": 1341.5,
+      "speedup_factor": 1391.9,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-bca9a3df_1790372585.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-a8fd4a52_1790410282.json",
       "notes": ""
     },
     {
@@ -316,11 +316,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.7125,
+      "execution_time_sec": 0.7529,
       "simulated_manual_time_sec": 1800.0,
-      "speedup_factor": 2526.3,
+      "speedup_factor": 2390.8,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-738975e0_1790372586.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-f80878c1_1790410283.json",
       "notes": ""
     },
     {
@@ -334,11 +334,11 @@
       "self_healing_triggered": true,
       "self_healing_recovered": true,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.9018,
+      "execution_time_sec": 0.8734,
       "simulated_manual_time_sec": 1400.0,
-      "speedup_factor": 1552.5,
+      "speedup_factor": 1602.9,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-f0262ca7_1790372586.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-aa717ed2_1790410284.json",
       "notes": ""
     },
     {
@@ -352,11 +352,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.0071,
+      "execution_time_sec": 0.0057,
       "simulated_manual_time_sec": 900.0,
-      "speedup_factor": 126760.6,
+      "speedup_factor": 157894.7,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-25cbd1e7_1790372587.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-c753ca2a_1790410284.json",
       "notes": ""
     },
     {
@@ -370,11 +370,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.002,
+      "execution_time_sec": 0.0,
       "simulated_manual_time_sec": 1800.0,
-      "speedup_factor": 900000.0,
+      "speedup_factor": 18000000.0,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-077f586a_1790372587.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-dbcbc681_1790410284.json",
       "notes": ""
     },
     {
@@ -388,11 +388,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.0091,
+      "execution_time_sec": 0.0043,
       "simulated_manual_time_sec": 1200.0,
-      "speedup_factor": 131868.1,
+      "speedup_factor": 279069.8,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-1f71ab4a_1790372587.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-9c2cf2e6_1790410284.json",
       "notes": ""
     },
     {
@@ -406,11 +406,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.0089,
+      "execution_time_sec": 0.0,
       "simulated_manual_time_sec": 1500.0,
-      "speedup_factor": 168539.3,
+      "speedup_factor": 15000000.0,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-782efda0_1790372587.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-2de10097_1790410284.json",
       "notes": ""
     },
     {
@@ -424,11 +424,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": true,
-      "execution_time_sec": 0.0363,
+      "execution_time_sec": 0.0253,
       "simulated_manual_time_sec": 2400.0,
-      "speedup_factor": 66115.7,
+      "speedup_factor": 94861.7,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-10b91213_1790372587.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-64d39453_1790410284.json",
       "notes": ""
     },
     {
@@ -442,11 +442,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.0063,
+      "execution_time_sec": 0.0157,
       "simulated_manual_time_sec": 2100.0,
-      "speedup_factor": 333333.3,
+      "speedup_factor": 133758.0,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-61292ca3_1790372587.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-46941169_1790410284.json",
       "notes": ""
     },
     {
@@ -460,11 +460,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": true,
-      "execution_time_sec": 0.0205,
+      "execution_time_sec": 0.0317,
       "simulated_manual_time_sec": 1200.0,
-      "speedup_factor": 58536.6,
+      "speedup_factor": 37854.9,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-d2ee4a85_1790372587.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-08fe16df_1790410284.json",
       "notes": ""
     },
     {
@@ -478,11 +478,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": true,
-      "execution_time_sec": 0.0338,
+      "execution_time_sec": 0.0319,
       "simulated_manual_time_sec": 900.0,
-      "speedup_factor": 26627.2,
+      "speedup_factor": 28213.2,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-8abef9c7_1790372587.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-3ab65d18_1790410284.json",
       "notes": ""
     },
     {
@@ -496,11 +496,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": true,
-      "execution_time_sec": 0.0337,
+      "execution_time_sec": 0.032,
       "simulated_manual_time_sec": 600.0,
-      "speedup_factor": 17804.2,
+      "speedup_factor": 18750.0,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-cb69baba_1790372587.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-98d8a330_1790410284.json",
       "notes": ""
     },
     {
@@ -514,11 +514,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": true,
-      "execution_time_sec": 0.0331,
+      "execution_time_sec": 0.0474,
       "simulated_manual_time_sec": 900.0,
-      "speedup_factor": 27190.3,
+      "speedup_factor": 18987.3,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-3ba2cf25_1790372587.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-136c46d6_1790410284.json",
       "notes": ""
     },
     {
@@ -532,11 +532,11 @@
       "self_healing_triggered": false,
       "self_healing_recovered": false,
       "human_approval_triggered": false,
-      "execution_time_sec": 0.0045,
+      "execution_time_sec": 0.0161,
       "simulated_manual_time_sec": 600.0,
-      "speedup_factor": 133333.3,
+      "speedup_factor": 37267.1,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-f3221fd7_1790372587.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-e991ab1f_1790410284.json",
       "notes": ""
     },
     {
@@ -554,7 +554,7 @@
       "simulated_manual_time_sec": 2400.0,
       "speedup_factor": 24000000.0,
       "cost_usd": 0.0,
-      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-81dfdbb9_1790372587.json",
+      "trace_log_path": "C:\\Users\\91984\\buildfastwithai\\eval\\reports\\trace_wf-b71cc2ea_1790410284.json",
       "notes": ""
     }
   ]

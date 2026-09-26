@@ -221,6 +221,7 @@ class WorkflowOrchestrator:
         await self.emit_event("WORKFLOW_COMPLETED", {
             "workflow_id": dag.workflow_id,
             "status": dag.overall_status,
+            "overall_status": dag.overall_status,   # alias for UI compatibility
             "completed_steps": dag.completed_steps,
             "total_steps": dag.total_steps,
             "trace_path": trace_path,
@@ -324,6 +325,27 @@ class WorkflowOrchestrator:
                     return v, f"{src}.{k}"
         return None, None
 
+    @staticmethod
+    def _path_candidates(path: str):
+        """
+        Yield the path as written plus forgiving variants for the most common
+        model mistakes:
+            'deal_id'  -> 'deal.id'      (sibling object holds the id)
+            'deal_id'  -> 'deals[0].id'  (plural container)
+            'deal_id'  -> 'id'           (id at the result root)
+        """
+        yield path
+        parts = path.split(".")
+        last = parts[-1]
+        if last.endswith("_id") and len(last) > 3:
+            base = last[:-3]
+            for candidate in (
+                ".".join(parts[:-1] + [base, "id"]),
+                ".".join(parts[:-1] + [base + "s", "0", "id"]),
+                ".".join(parts[:-1] + ["id"]),
+            ):
+                yield candidate
+
     def _resolve_parameters(
         self, step: WorkflowStep, dag: WorkflowDAG
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
@@ -356,7 +378,16 @@ class WorkflowOrchestrator:
                 sid, path = m.group(1), m.group(2)
                 if sid not in by_step:
                     return _MISSING
-                return by_step[sid] if not path else self._walk_path(by_step[sid], path)
+                root = by_step[sid]
+                if not path:
+                    return root
+                # Try the path as written, then forgiving variants for common
+                # model guesses (e.g. result.deal_id -> result.deal.id).
+                for candidate in self._path_candidates(path):
+                    val = self._walk_path(root, candidate)
+                    if val is not _MISSING:
+                        return val
+                return _MISSING
             # bare name -> search earlier results
             val, _src = self._find_upstream_value(expr.strip(), earlier)
             return _MISSING if val is None else val
@@ -601,8 +632,6 @@ class WorkflowOrchestrator:
             "comment": decision.comment,
         })
         return "TIMEOUT" if timed_out else "REJECTED"
-
-        return "OK"
 
     # ------------------------------------------------------------------
     # Tool dispatch

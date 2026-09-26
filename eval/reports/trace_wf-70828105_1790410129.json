@@ -1,0 +1,169 @@
+{
+  "workflow_id": "wf-70828105",
+  "goal": "Execute end-to-end partner onboarding form submission under mutated accessibility labels.",
+  "planner_mode": "HEURISTIC",
+  "planner_model": null,
+  "start_time": 1790410128.2495828,
+  "end_time": 1790410129.2280612,
+  "total_duration_sec": 0.978,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Query CRM Leads",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_get_leads",
+      "parameters": {},
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790410128.2495828,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790410128.2525952,
+      "duration_sec": 0.003,
+      "result": {
+        "count": 6,
+        "leads": [
+          {
+            "id": "LEAD-101",
+            "name": "Sarah Chen",
+            "email": "sarah.c@techcorp.io",
+            "company": "TechCorp",
+            "score": 88,
+            "status": "QUALIFIED",
+            "deal_value": 45000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-20"
+          },
+          {
+            "id": "LEAD-102",
+            "name": "Marcus Vance",
+            "email": "mvance@apexscale.com",
+            "company": "ApexScale",
+            "score": 94,
+            "status": "PROPOSAL_SENT",
+            "deal_value": 78000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-22"
+          },
+          {
+            "id": "LEAD-103",
+            "name": "David Kim",
+            "email": "dkim@quantumops.ai",
+            "company": "QuantumOps",
+            "score": 72,
+            "status": "CONTACTED",
+            "deal_value": 30000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-18"
+          },
+          {
+            "id": "LEAD-104",
+            "name": "Priya Sharma",
+            "email": "psharma@solargrid.in",
+            "company": "SolarGrid India",
+            "score": 90,
+            "status": "QUALIFIED",
+            "deal_value": 110000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-24",
+            "notes": "Updated by NexusFlow workflow: Scrape Edge Compute Node inventory from portal and enrich CRM lead LEAD-104 with"
+          },
+          {
+            "id": "LEAD-105",
+            "name": "Jason Bourne",
+            "email": "jbourne@treadstone.org",
+            "company": "Treadstone Media",
+            "score": 45,
+            "status": "COLD",
+            "deal_value": 15000,
+            "assigned_rep": "Unassigned",
+            "last_contact": "2026-08-10"
+          },
+          {
+            "id": "LEAD-106",
+            "name": "Chloe Bennett",
+            "email": "cbennett@cloudshield.net",
+            "company": "CloudShield",
+            "score": 91,
+            "status": "NEGOTIATION",
+            "deal_value": 62000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-23"
+          }
+        ],
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Submit Web Portal Form",
+      "tool_type": "BROWSER",
+      "tool_name": "fill_form_and_click",
+      "parameters": {
+        "form_data": {
+          "company_name": "SolarGrid India",
+          "contact_email": "psharma@solargrid.in"
+        },
+        "target_button_selector": "#submit-lead-btn",
+        "semantic_intent": "Submit Lead Sync"
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790410128.2525952,
+      "status": "RECOVERED",
+      "logs": [
+        {
+          "timestamp": 1790410129.175609,
+          "level": "INFO",
+          "message": "Stage 0 (Learned Memory): resolved 'text=Confirm & Synchronize Record' from previous self-heal.",
+          "metadata": {}
+        },
+        {
+          "timestamp": 1790410129.175609,
+          "level": "SUCCESS",
+          "message": "[RECOVERED] Self-healing succeeded using LEARNED_MEMORY -> text=Confirm & Synchronize Record",
+          "metadata": {}
+        }
+      ],
+      "retries": 1,
+      "end_time": 1790410129.2280612,
+      "duration_sec": 0.975,
+      "result": {
+        "success": true,
+        "self_healed": true,
+        "strategy": "LEARNED_MEMORY",
+        "engine": "PLAYWRIGHT",
+        "executed_selector": "text=Confirm & Synchronize Record",
+        "filled_fields": [
+          "company_name",
+          "contact_email"
+        ],
+        "clicked": true,
+        "click_error": null,
+        "dom_feedback": "Lead Submitted Successfully to Pipeline!",
+        "submitted_payload": {
+          "company_name": "SolarGrid India",
+          "contact_email": "psharma@solargrid.in"
+        },
+        "result_message": "Lead record submitted via real Chromium click."
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [
+    {
+      "workflow_id": "wf-70828105",
+      "step_id": "step-2",
+      "timestamp": 1790410129.175609,
+      "failed_selector": "#submit-lead-btn",
+      "recovery_strategy": "LEARNED_MEMORY",
+      "recovered_selector": "text=Confirm & Synchronize Record",
+      "details": "Target button resolved via LEARNED_MEMORY from semantic intent 'Submit Lead Sync'. Engine: PLAYWRIGHT."
+    }
+  ],
+  "hitl_events": [],
+  "cost_usd": 0.0
+}

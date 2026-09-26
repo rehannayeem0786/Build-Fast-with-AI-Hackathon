@@ -1,0 +1,149 @@
+{
+  "workflow_id": "wf-3ab65d18",
+  "goal": "Attempt outbound email dispatch to executive contact; verify diff preview is staged and requires approval.",
+  "planner_mode": "HEURISTIC",
+  "planner_model": null,
+  "start_time": 1790410284.3263345,
+  "end_time": 1790410284.3582451,
+  "total_duration_sec": 0.032,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Query CRM Leads",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_get_leads",
+      "parameters": {},
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790410284.3263345,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790410284.3263345,
+      "duration_sec": 0.0,
+      "result": {
+        "count": 6,
+        "leads": [
+          {
+            "id": "LEAD-101",
+            "name": "Sarah Chen",
+            "email": "sarah.c@techcorp.io",
+            "company": "TechCorp",
+            "score": 88,
+            "status": "QUALIFIED",
+            "deal_value": 45000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-20"
+          },
+          {
+            "id": "LEAD-102",
+            "name": "Marcus Vance",
+            "email": "mvance@apexscale.com",
+            "company": "ApexScale",
+            "score": 94,
+            "status": "PROPOSAL_SENT",
+            "deal_value": 78000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-22"
+          },
+          {
+            "id": "LEAD-103",
+            "name": "David Kim",
+            "email": "dkim@quantumops.ai",
+            "company": "QuantumOps",
+            "score": 72,
+            "status": "CONTACTED",
+            "deal_value": 30000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-18"
+          },
+          {
+            "id": "LEAD-104",
+            "name": "Priya Sharma",
+            "email": "psharma@solargrid.in",
+            "company": "SolarGrid India",
+            "score": 90,
+            "status": "QUALIFIED",
+            "deal_value": 110000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-24",
+            "notes": "Updated by NexusFlow workflow: Scrape Edge Compute Node inventory from portal and enrich CRM lead LEAD-104 with"
+          },
+          {
+            "id": "LEAD-105",
+            "name": "Jason Bourne",
+            "email": "jbourne@treadstone.org",
+            "company": "Treadstone Media",
+            "score": 45,
+            "status": "COLD",
+            "deal_value": 15000,
+            "assigned_rep": "Unassigned",
+            "last_contact": "2026-08-10"
+          },
+          {
+            "id": "LEAD-106",
+            "name": "Chloe Bennett",
+            "email": "cbennett@cloudshield.net",
+            "company": "CloudShield",
+            "score": 91,
+            "status": "NEGOTIATION",
+            "deal_value": 62000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-23"
+          }
+        ],
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Dispatch Outbound Email",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "email_send_reminder",
+      "parameters": {
+        "to_email": "psharma@solargrid.in",
+        "subject": "NexusFlow Notice regarding INV-2026-003",
+        "body": "Operational notice generated for goal: Attempt outbound email dispatch to executive contact; verify diff preview is staged and requires approval."
+      },
+      "risk_level": "CRITICAL",
+      "requires_approval": true,
+      "start_time": 1790410284.3263345,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790410284.3582451,
+      "duration_sec": 0.032,
+      "result": {
+        "dispatched": true,
+        "timestamp": 1790410284.3582451,
+        "message_id": "MSG-1790410284358",
+        "to": "psharma@solargrid.in",
+        "subject": "NexusFlow Notice regarding INV-2026-003",
+        "status": "SENT_VIA_MOCK_SMTP",
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [
+    {
+      "workflow_id": "wf-3ab65d18",
+      "step_id": "step-2",
+      "timestamp": 1790410284.3582451,
+      "decision": "APPROVE",
+      "diff_before": {
+        "recipient": "psharma@solargrid.in",
+        "outbox_status": "DRAFT_QUEUED"
+      },
+      "diff_after": {
+        "recipient": "psharma@solargrid.in",
+        "subject": "NexusFlow Notice regarding INV-2026-003",
+        "outbox_status": "DISPATCHED_TO_SMTP"
+      }
+    }
+  ],
+  "cost_usd": 0.0
+}

@@ -1,0 +1,237 @@
+{
+  "workflow_id": "wf-0b966694",
+  "goal": "Scan Stripe billing portal for overdue invoices, match against CRM contacts, and draft tracking log.",
+  "planner_mode": "HEURISTIC",
+  "planner_model": null,
+  "start_time": 1790410278.2682252,
+  "end_time": 1790410278.948493,
+  "total_duration_sec": 0.68,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Query Billing Invoices",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_get_invoices",
+      "parameters": {
+        "status": "OVERDUE"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790410278.2682252,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790410278.3425121,
+      "duration_sec": 0.074,
+      "result": {
+        "count": 3,
+        "invoices": [
+          {
+            "id": "INV-2026-001",
+            "customer_email": "sarah.c@techcorp.io",
+            "amount_due": 4500.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-15",
+            "currency": "USD",
+            "items": [
+              "Enterprise Tier Monthly",
+              "Addon Seats x 10"
+            ]
+          },
+          {
+            "id": "INV-2026-003",
+            "customer_email": "psharma@solargrid.in",
+            "amount_due": 8900.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-10",
+            "currency": "USD",
+            "items": [
+              "IoT Gateway Connector Support"
+            ]
+          },
+          {
+            "id": "INV-2026-004",
+            "customer_email": "cbennett@cloudshield.net",
+            "amount_due": 3400.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-18",
+            "currency": "USD",
+            "items": [
+              "Cloud SOC Monitoring"
+            ]
+          }
+        ],
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Query CRM Leads",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_get_leads",
+      "parameters": {},
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790410278.2682252,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790410278.3445153,
+      "duration_sec": 0.076,
+      "result": {
+        "count": 6,
+        "leads": [
+          {
+            "id": "LEAD-101",
+            "name": "Sarah Chen",
+            "email": "sarah.c@techcorp.io",
+            "company": "TechCorp",
+            "score": 88,
+            "status": "QUALIFIED",
+            "deal_value": 45000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-20"
+          },
+          {
+            "id": "LEAD-102",
+            "name": "Marcus Vance",
+            "email": "mvance@apexscale.com",
+            "company": "ApexScale",
+            "score": 94,
+            "status": "PROPOSAL_SENT",
+            "deal_value": 78000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-22"
+          },
+          {
+            "id": "LEAD-103",
+            "name": "David Kim",
+            "email": "dkim@quantumops.ai",
+            "company": "QuantumOps",
+            "score": 72,
+            "status": "CONTACTED",
+            "deal_value": 30000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-18"
+          },
+          {
+            "id": "LEAD-104",
+            "name": "Priya Sharma",
+            "email": "psharma@solargrid.in",
+            "company": "SolarGrid India",
+            "score": 90,
+            "status": "QUALIFIED",
+            "deal_value": 110000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-24",
+            "notes": "Updated by NexusFlow workflow: Reconcile active deals against lead status to ensure proposal stages match custo"
+          },
+          {
+            "id": "LEAD-105",
+            "name": "Jason Bourne",
+            "email": "jbourne@treadstone.org",
+            "company": "Treadstone Media",
+            "score": 45,
+            "status": "COLD",
+            "deal_value": 15000,
+            "assigned_rep": "Unassigned",
+            "last_contact": "2026-08-10"
+          },
+          {
+            "id": "LEAD-106",
+            "name": "Chloe Bennett",
+            "email": "cbennett@cloudshield.net",
+            "company": "CloudShield",
+            "score": 91,
+            "status": "NEGOTIATION",
+            "deal_value": 62000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-23"
+          }
+        ],
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-3",
+      "name": "Scrape Portal Data Table",
+      "tool_type": "BROWSER",
+      "tool_name": "scrape_table",
+      "parameters": {
+        "table_selector": "#portal-data-table"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790410278.2682252,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790410278.948493,
+      "duration_sec": 0.68,
+      "result": {
+        "rows": [
+          {
+            "SKU ID": "SKU-8812",
+            "Product Title": "Industrial Optical Sensor Hub",
+            "Inventory Status": "In Stock",
+            "Price": "$1,450.00"
+          },
+          {
+            "SKU ID": "SKU-8813",
+            "Product Title": "Edge Compute Node A100",
+            "Inventory Status": "Low Stock (2 remaining)",
+            "Price": "$9,800.00"
+          }
+        ],
+        "count": 2,
+        "engine": "PLAYWRIGHT"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-4",
+      "name": "Update Tracking Sheet",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "sheets_append_row",
+      "parameters": {
+        "sheet_name": "Executive Ops Summary",
+        "row_data": {
+          "Account": "SolarGrid India",
+          "Region": "APAC",
+          "ARR": 8900.0,
+          "Health": "Amber",
+          "Action Required": "Auto: Scan Stripe billing portal for overdue invoices,"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790410278.948493,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790410278.948493,
+      "duration_sec": 0.0,
+      "result": {
+        "success": true,
+        "sheet_name": "Executive Ops Summary",
+        "row_number": 4,
+        "data": {
+          "Row": 4,
+          "Account": "SolarGrid India",
+          "Region": "APAC",
+          "ARR": 8900.0,
+          "Health": "Amber",
+          "Action Required": "Auto: Scan Stripe billing portal for overdue invoices,"
+        },
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [],
+  "cost_usd": 0.0
+}

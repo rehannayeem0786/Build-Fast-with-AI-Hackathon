@@ -44,7 +44,8 @@ class MCPToolHub:
             },
             {
                 "name": "crm_update_lead",
-                "description": "Update specific fields of a CRM lead (status, score, deal_value, notes).",
+                "description": "Update specific fields of a CRM lead (status, score, deal_value, notes). "
+                               "Returns {success, lead_id, updated_lead:{...}, before:{...}}.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -56,7 +57,8 @@ class MCPToolHub:
             },
             {
                 "name": "crm_get_lead_by_id",
-                "description": "Fetch a single CRM lead record by its exact lead ID.",
+                "description": "Fetch a single CRM lead record by its exact lead ID. "
+                               "Returns {found, lead:{id, name, email, score, status, ...}}.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -67,7 +69,9 @@ class MCPToolHub:
             },
             {
                 "name": "crm_create_deal",
-                "description": "Create a new sales deal in the CRM for a qualified lead.",
+                "description": "Create a new sales deal in the CRM for a qualified lead. "
+                               "Returns {success, deal:{id, lead_id, title, amount, stage, ...}}. "
+                               "Reference the created deal id via {{<this_step_id>.result.deal.id}}.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -93,7 +97,8 @@ class MCPToolHub:
             },
             {
                 "name": "billing_charge_invoice",
-                "description": "Execute automatic payment charge against a customer invoice (CRITICAL RISK).",
+                "description": "Execute automatic payment charge against a customer invoice (CRITICAL RISK). "
+                               "Returns {success, transaction:{txn_id, amount, status}, invoice:{id, status, ...}}.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -105,7 +110,9 @@ class MCPToolHub:
             },
             {
                 "name": "billing_prepare_reminder",
-                "description": "Generate an overdue invoice reminder email payload without sending.",
+                "description": "Generate an overdue invoice reminder email payload without sending. "
+                               "Returns {to_email, subject, body, invoice_details:{id, ...}}. "
+                               "Reference the draft body via {{<this_step_id>.result.body}}.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -128,7 +135,9 @@ class MCPToolHub:
             },
             {
                 "name": "sheets_append_row",
-                "description": "Append a new row of operational data to a tracking sheet.",
+                "description": "Append a new row of operational data to a tracking sheet. "
+                               "Returns {success, sheet_name, row_number, data}. "
+                               "Reference the new row via {{<this_step_id>.result.row_number}}.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -140,7 +149,8 @@ class MCPToolHub:
             },
             {
                 "name": "sheets_update_row",
-                "description": "Update existing rows in a sheet matching a filter key/value pair.",
+                "description": "Update existing rows in a sheet matching a filter key/value pair. "
+                               "Returns {success, sheet_name, updated_count, rows:[{...}]}.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -166,7 +176,8 @@ class MCPToolHub:
             },
             {
                 "name": "email_send_reminder",
-                "description": "Send an external email notification to a client (CRITICAL RISK).",
+                "description": "Send an external email notification to a client (CRITICAL RISK). "
+                               "Returns {dispatched, message_id, to, subject, status}.",
                 "parameters": {
                     "type": "object",
                     "properties": {

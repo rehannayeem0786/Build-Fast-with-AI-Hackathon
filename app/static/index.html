@@ -4,59 +4,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NexusFlow AI · Autonomous Multi-App Operations & Self-Healing Agent</title>
+    <meta name="description" content="NexusFlow AI: An autonomous operations agent that turns natural language goals into verified, cross-application workflows across CRM, billing, and spreadsheets with real MCP, self-healing browser automation, and human-in-the-loop governance.">
+    <meta property="og:title" content="NexusFlow AI · Autonomous Multi-App Operations">
+    <meta property="og:description" content="Real MCP · Self-Healing Browser Agent · Fail-Safe HITL · DAG Planner">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+    <!-- Animated Mesh Background -->
+    <canvas id="mesh-bg"></canvas>
+
     <div class="app-container">
         <!-- Top Navigation -->
         <header class="top-nav">
             <div class="brand">
-                <span class="brand-badge">PS-01 · AGENTIC OPS</span>
+                <div class="brand-logo-wrap">
+                    <div class="brand-glow"></div>
+                    <span class="brand-badge">PS-01 · AGENTIC OPS</span>
+                </div>
                 <h1 class="brand-title">NexusFlow <span class="gold-accent">AI</span></h1>
                 <span class="version-tag">v1.0.0</span>
             </div>
             <div class="nav-metrics">
                 <div class="metric-pill">
+                    <span class="metric-icon">🧠</span>
                     <span class="metric-label">Engine:</span>
-                    <span class="metric-val">LLM Planner + MCP</span>
+                    <span class="metric-val" id="engine-display">LLM Planner + MCP</span>
                 </div>
                 <div class="metric-pill">
+                    <span class="metric-icon">🔄</span>
                     <span class="metric-label">Self-Healing:</span>
-                    <span class="metric-val text-emerald">Active (5-Stage)</span>
+                    <span class="metric-val text-cyan">Active (5-Stage)</span>
                 </div>
                 <div class="metric-pill">
+                    <span class="metric-icon">🛡️</span>
                     <span class="metric-label">SafeGuard:</span>
                     <span class="metric-val text-gold">Fail-Safe HITL</span>
                 </div>
-                <div class="status-indicator">
+                <div class="status-indicator" id="ws-indicator">
                     <span class="status-dot"></span>
-                    <span id="ws-status">System Ready</span>
+                    <span id="ws-status">Connecting...</span>
                 </div>
             </div>
         </header>
 
-        <!-- Main Content Area -->
-        <main class="main-layout">
-            <!-- Left Control & Goal Input Column -->
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="operations" onclick="switchTab('operations')">
+                <span class="tab-icon">⚡</span> Operations Console
+            </button>
+            <button class="tab-btn" data-tab="architecture" onclick="switchTab('architecture')">
+                <span class="tab-icon">🏛️</span> Architecture
+            </button>
+            <button class="tab-btn" data-tab="benchmark" onclick="switchTab('benchmark')">
+                <span class="tab-icon">📊</span> Benchmark-30
+            </button>
+        </nav>
+
+        <!-- ============ TAB: Operations Console ============ -->
+        <main class="main-layout tab-content active" id="tab-operations">
+            <!-- Left Column -->
             <section class="control-panel">
-                <div class="card goal-card">
+                <!-- Goal Input -->
+                <div class="card goal-card glass-card">
                     <div class="card-header">
-                        <span class="section-label">01 · OPERATIONAL GOAL</span>
-                        <span class="hint-text">Natural Language to DAG</span>
+                        <div class="section-label-wrap">
+                            <span class="section-number">01</span>
+                            <span class="section-label">OPERATIONAL GOAL</span>
+                        </div>
+                        <span class="hint-text">Natural Language → DAG</span>
                     </div>
                     
                     <div class="input-wrapper">
                         <textarea id="goal-input" rows="3" placeholder="Enter high-level goal... e.g. Reconcile overdue invoices in Stripe with HubSpot leads, update tracking sheet, and queue reminder emails for approval."></textarea>
+                        <div class="input-glow"></div>
                     </div>
 
                     <div class="quick-prompts">
                         <span class="quick-label">Presets:</span>
-                        <button class="chip" onclick="setGoal(1)">💳 Billing & Invoice Reconcile</button>
-                        <button class="chip" onclick="setGoal(2)">🌐 Self-Healing Portal & Lead Sync</button>
-                        <button class="chip" onclick="setGoal(3)">🚀 Enterprise CRM Deal Triage</button>
+                        <button class="chip" onclick="setGoal(1)"><span class="chip-icon">💳</span> Billing & Invoice Reconcile</button>
+                        <button class="chip" onclick="setGoal(2)"><span class="chip-icon">🌐</span> Self-Healing Portal & Lead Sync</button>
+                        <button class="chip" onclick="setGoal(3)"><span class="chip-icon">🚀</span> Enterprise CRM Deal Triage</button>
                     </div>
 
                     <div class="action-row">
@@ -64,74 +95,135 @@
                             <label class="toggle-label">Portal DOM:</label>
                             <select id="dom-version-select" onchange="changeDomVersion()">
                                 <option value="v1">Standard DOM (v1)</option>
-                                <option value="v2">Mutated DOM (v2 Self-Healing Test)</option>
+                                <option value="v2">Mutated DOM (v2 — Self-Healing Test)</option>
                             </select>
                         </div>
                         <button id="execute-btn" class="btn-primary" onclick="startWorkflow()">
-                            <span class="btn-icon">⚡</span> Execute Goal
+                            <span class="btn-icon">⚡</span>
+                            <span class="btn-text">Execute Goal</span>
+                            <div class="btn-spinner hidden" id="exec-spinner"></div>
                         </button>
                     </div>
                 </div>
 
-                <!-- Active Workflow DAG Visualizer -->
-                <div class="card dag-card">
+                <!-- DAG Visualizer -->
+                <div class="card dag-card glass-card">
                     <div class="card-header">
-                        <span class="section-label">02 · EXECUTION DAG GRAPH</span>
+                        <div class="section-label-wrap">
+                            <span class="section-number">02</span>
+                            <span class="section-label">EXECUTION DAG</span>
+                        </div>
                         <div class="dag-header-actions">
-                            <button id="undo-btn" class="btn-undo hidden" onclick="undoCurrentWorkflow()">↺ Rollback (Undo)</button>
+                            <button id="undo-btn" class="btn-undo hidden" onclick="undoCurrentWorkflow()">
+                                <span>↺</span> Rollback
+                            </button>
                             <span id="workflow-status-badge" class="badge-status">AWAITING GOAL</span>
                         </div>
                     </div>
                     <div id="dag-container" class="dag-container">
-                        <div class="empty-state">No active workflow. Enter a goal and click Execute.</div>
+                        <div class="empty-state">
+                            <div class="empty-icon">🔀</div>
+                            <div class="empty-text">No active workflow. Enter a goal and click Execute.</div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Quick Benchmark Summary Card -->
-                <div class="card bench-summary-card">
-                    <div class="card-header">
-                        <span class="section-label">03 · BENCHMARK-30 EVALUATION</span>
-                        <button class="btn-secondary-sm" onclick="runBenchmarks()">Run All 30 Tests</button>
+                <!-- Live Metrics Strip -->
+                <div class="card metrics-strip glass-card">
+                    <div class="metric-block">
+                        <div class="metric-big-val" id="m-steps">—</div>
+                        <div class="metric-big-label">Steps</div>
                     </div>
-                    <div class="bench-stats-grid">
-                        <div class="b-stat">
-                            <div class="b-val" id="b-pass-rate">100%</div>
-                            <div class="b-lbl">Task Pass Rate</div>
-                        </div>
-                        <div class="b-stat">
-                            <div class="b-val text-emerald" id="b-self-healing">100%</div>
-                            <div class="b-lbl">Self-Healing Rate</div>
-                        </div>
-                        <div class="b-stat">
-                            <div class="b-val text-gold" id="b-speedup">6000x+</div>
-                            <div class="b-lbl">Suite Speedup</div>
-                        </div>
-                        <div class="b-stat">
-                            <div class="b-val" id="b-cost">$0.00</div>
-                            <div class="b-lbl">Planning Cost</div>
-                        </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-block">
+                        <div class="metric-big-val text-cyan" id="m-healed">—</div>
+                        <div class="metric-big-label">Self-Healed</div>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-block">
+                        <div class="metric-big-val text-gold" id="m-gates">—</div>
+                        <div class="metric-big-label">Gates Fired</div>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-block">
+                        <div class="metric-big-val text-emerald" id="m-time">—</div>
+                        <div class="metric-big-label">Exec Time</div>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-block">
+                        <div class="metric-big-val" id="m-cost">$0.00</div>
+                        <div class="metric-big-label">LLM Cost</div>
                     </div>
                 </div>
             </section>
 
-            <!-- Right Telemetry & Trace Waterfall Column -->
+            <!-- Right Column -->
             <section class="telemetry-panel">
-                <div class="card telemetry-card">
+                <!-- Telemetry Feed -->
+                <div class="card telemetry-card glass-card">
                     <div class="card-header">
-                        <span class="section-label">04 · REAL-TIME TRACE TELEMETRY</span>
-                        <span class="trace-id" id="active-trace-id">Trace ID: None</span>
+                        <div class="section-label-wrap">
+                            <span class="section-number">03</span>
+                            <span class="section-label">REAL-TIME TRACE</span>
+                        </div>
+                        <span class="trace-id" id="active-trace-id">Trace: None</span>
                     </div>
                     <div id="telemetry-feed" class="telemetry-feed">
                         <div class="trace-empty-state">
-                            Real-time WebSocket step execution events, tool calls, DOM grounding traces, and SafeGuard diffs will stream here live.
+                            <div class="empty-icon pulse-icon">📡</div>
+                            <div>Real-time WebSocket events, tool calls, DOM grounding traces, and SafeGuard diffs stream here live.</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sandbox Portal Live Viewport -->
-                <div class="card portal-card">
+                <!-- Self-Healing Cascade Visualizer -->
+                <div class="card healing-card glass-card hidden" id="healing-card">
                     <div class="card-header">
-                        <span class="section-label">05 · LIVE TARGET APP SANDBOX</span>
+                        <div class="section-label-wrap">
+                            <span class="section-number">🔄</span>
+                            <span class="section-label">SELF-HEALING CASCADE</span>
+                        </div>
+                    </div>
+                    <div class="healing-stages" id="healing-stages">
+                        <div class="healing-stage" data-stage="0">
+                            <span class="stage-num">0</span>
+                            <span class="stage-name">Learned Memory</span>
+                            <span class="stage-status" id="hs-0">—</span>
+                        </div>
+                        <div class="healing-connector"></div>
+                        <div class="healing-stage" data-stage="1">
+                            <span class="stage-num">1</span>
+                            <span class="stage-name">Exact CSS/ID</span>
+                            <span class="stage-status" id="hs-1">—</span>
+                        </div>
+                        <div class="healing-connector"></div>
+                        <div class="healing-stage" data-stage="2">
+                            <span class="stage-num">2</span>
+                            <span class="stage-name">Semantic Text</span>
+                            <span class="stage-status" id="hs-2">—</span>
+                        </div>
+                        <div class="healing-connector"></div>
+                        <div class="healing-stage" data-stage="3">
+                            <span class="stage-num">3</span>
+                            <span class="stage-name">Accessibility Tree</span>
+                            <span class="stage-status" id="hs-3">—</span>
+                        </div>
+                        <div class="healing-connector"></div>
+                        <div class="healing-stage" data-stage="4">
+                            <span class="stage-num">4</span>
+                            <span class="stage-name">Form Proximity</span>
+                            <span class="stage-status" id="hs-4">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sandbox Portal -->
+                <div class="card portal-card glass-card">
+                    <div class="card-header">
+                        <div class="section-label-wrap">
+                            <span class="section-number">04</span>
+                            <span class="section-label">TARGET APP SANDBOX</span>
+                        </div>
                         <a href="/portal" target="_blank" class="link-ext">Open in Tab ↗</a>
                     </div>
                     <div class="iframe-container">
@@ -140,14 +232,205 @@
                 </div>
             </section>
         </main>
+
+        <!-- ============ TAB: Architecture ============ -->
+        <div class="tab-content" id="tab-architecture">
+            <div class="arch-grid">
+                <div class="card glass-card arch-hero-card">
+                    <h2 class="arch-title">System Architecture</h2>
+                    <p class="arch-subtitle">How NexusFlow AI turns natural language goals into verified, multi-app workflows</p>
+                    <div class="arch-diagram">
+                        <div class="arch-layer arch-layer-input">
+                            <div class="arch-node arch-node-primary">
+                                <div class="arch-node-icon">💬</div>
+                                <div class="arch-node-label">User Goal</div>
+                                <div class="arch-node-desc">Natural language prompt</div>
+                            </div>
+                            <div class="arch-arrow">▼</div>
+                        </div>
+                        <div class="arch-layer">
+                            <div class="arch-node arch-node-gold">
+                                <div class="arch-node-icon">🧠</div>
+                                <div class="arch-node-label">Goal-to-DAG Planner</div>
+                                <div class="arch-node-desc">LLM (Groq→OpenRouter) or Heuristic Engine</div>
+                                <div class="arch-node-tags">
+                                    <span class="arch-tag">Structured JSON</span>
+                                    <span class="arch-tag">Tool-Schema Validation</span>
+                                    <span class="arch-tag">Hallucination Rejection</span>
+                                </div>
+                            </div>
+                            <div class="arch-arrow">▼</div>
+                        </div>
+                        <div class="arch-layer arch-layer-split">
+                            <div class="arch-node arch-node-danger">
+                                <div class="arch-node-icon">🛡️</div>
+                                <div class="arch-node-label">SafeGuard Risk Gate</div>
+                                <div class="arch-node-desc">4-tier HITL with fail-safe timeout</div>
+                                <div class="arch-tiers">
+                                    <span class="tier tier-low">LOW: Auto</span>
+                                    <span class="tier tier-med">MED: Audit</span>
+                                    <span class="tier tier-high">HIGH: Diff</span>
+                                    <span class="tier tier-crit">CRIT: Human Gate</span>
+                                </div>
+                            </div>
+                            <div class="arch-node arch-node-info">
+                                <div class="arch-node-icon">📊</div>
+                                <div class="arch-node-label">Telemetry & Traces</div>
+                                <div class="arch-node-desc">JSON audit trails, RCA, undo log</div>
+                            </div>
+                        </div>
+                        <div class="arch-arrow">▼</div>
+                        <div class="arch-layer arch-layer-split">
+                            <div class="arch-node arch-node-purple">
+                                <div class="arch-node-icon">🔌</div>
+                                <div class="arch-node-label">MCP Server (stdio)</div>
+                                <div class="arch-node-desc">Official SDK · 12 tools</div>
+                                <div class="arch-node-tags">
+                                    <span class="arch-tag">CRM</span>
+                                    <span class="arch-tag">Billing</span>
+                                    <span class="arch-tag">Sheets</span>
+                                    <span class="arch-tag">Email</span>
+                                </div>
+                            </div>
+                            <div class="arch-node arch-node-cyan">
+                                <div class="arch-node-icon">🌐</div>
+                                <div class="arch-node-label">Self-Healing Browser</div>
+                                <div class="arch-node-desc">Playwright Chromium · 5-stage cascade</div>
+                                <div class="arch-node-tags">
+                                    <span class="arch-tag">Memory</span>
+                                    <span class="arch-tag">CSS/ID</span>
+                                    <span class="arch-tag">Semantic</span>
+                                    <span class="arch-tag">AX Tree</span>
+                                    <span class="arch-tag">Proximity</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Features Cards -->
+                <div class="arch-features">
+                    <div class="card glass-card feature-card">
+                        <div class="feature-icon">🔌</div>
+                        <h3>Real MCP Transport</h3>
+                        <p>Official <code>mcp</code> SDK over stdio subprocess. Initialize handshake → <code>tools/list</code> → <code>tools/call</code>. Never a mock.</p>
+                    </div>
+                    <div class="card glass-card feature-card">
+                        <div class="feature-icon">🔄</div>
+                        <h3>5-Stage Self-Healing</h3>
+                        <p>Learned Memory → Exact CSS → Semantic Text → AX Tree → Form Proximity. Persists healed selectors for future runs.</p>
+                    </div>
+                    <div class="card glass-card feature-card">
+                        <div class="feature-icon">🛡️</div>
+                        <h3>Fail-Safe HITL Gate</h3>
+                        <p>4-tier risk matrix. APPROVE / MODIFY / REJECT with JSON diffs. Timeout auto-REJECTs (deny-by-default).</p>
+                    </div>
+                    <div class="card glass-card feature-card">
+                        <div class="feature-icon">↩️</div>
+                        <h3>Compensating Rollback</h3>
+                        <p>Every reversible mutation records a compensating action. One API call to undo an entire workflow.</p>
+                    </div>
+                    <div class="card glass-card feature-card">
+                        <div class="feature-icon">🔗</div>
+                        <h3>Inter-Step Dataflow</h3>
+                        <p><code>{{step-1.result.invoices[0].id}}</code> references resolved against live upstream results with implicit dependency wiring.</p>
+                    </div>
+                    <div class="card glass-card feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>Honest Cost Accounting</h3>
+                        <p>$0.00 when deterministic planner runs. Token cost only with LLM keys. Every trace records exact provider:model used.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ TAB: Benchmark-30 ============ -->
+        <div class="tab-content" id="tab-benchmark">
+            <div class="bench-layout">
+                <!-- Benchmark Hero Stats -->
+                <div class="card glass-card bench-hero-card">
+                    <div class="card-header">
+                        <div class="section-label-wrap">
+                            <span class="section-number">📊</span>
+                            <span class="section-label">BENCHMARK-30 EVALUATION SUITE</span>
+                        </div>
+                        <button class="btn-primary btn-sm" onclick="runBenchmarks()" id="bench-run-btn">
+                            <span class="btn-icon">▶</span>
+                            <span class="btn-text">Run All 30 Tests</span>
+                            <div class="btn-spinner hidden" id="bench-spinner"></div>
+                        </button>
+                    </div>
+                    <div class="bench-stats-grid">
+                        <div class="b-stat">
+                            <div class="b-val counter" id="b-pass-rate" data-target="100">100%</div>
+                            <div class="b-lbl">Task Pass Rate</div>
+                            <div class="b-bar"><div class="b-bar-fill emerald" style="width:100%"></div></div>
+                        </div>
+                        <div class="b-stat">
+                            <div class="b-val text-cyan counter" id="b-self-healing" data-target="100">100%</div>
+                            <div class="b-lbl">Self-Healing Recovery</div>
+                            <div class="b-bar"><div class="b-bar-fill cyan" style="width:100%"></div></div>
+                        </div>
+                        <div class="b-stat">
+                            <div class="b-val text-gold counter" id="b-speedup">4400x</div>
+                            <div class="b-lbl">Suite Speedup (est.)</div>
+                            <div class="b-bar"><div class="b-bar-fill gold" style="width:100%"></div></div>
+                        </div>
+                        <div class="b-stat">
+                            <div class="b-val counter" id="b-cost">$0.00</div>
+                            <div class="b-lbl">Planning Cost</div>
+                            <div class="b-bar"><div class="b-bar-fill emerald" style="width:100%"></div></div>
+                        </div>
+                        <div class="b-stat">
+                            <div class="b-val text-emerald counter" id="b-gates">7</div>
+                            <div class="b-lbl">SafeGuard Gates</div>
+                            <div class="b-bar"><div class="b-bar-fill emerald" style="width:100%"></div></div>
+                        </div>
+                        <div class="b-stat">
+                            <div class="b-val counter" id="b-wall-clock">~10s</div>
+                            <div class="b-lbl">Total Wall-Clock</div>
+                            <div class="b-bar"><div class="b-bar-fill emerald" style="width:100%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Benchmark Task Matrix -->
+                <div class="card glass-card bench-matrix-card">
+                    <div class="card-header">
+                        <span class="section-label">TASK MATRIX</span>
+                        <div class="bench-filter-row">
+                            <button class="filter-chip active" onclick="filterBench('all')">All</button>
+                            <button class="filter-chip" onclick="filterBench('CRM')">CRM</button>
+                            <button class="filter-chip" onclick="filterBench('Billing')">Billing</button>
+                            <button class="filter-chip" onclick="filterBench('Web')">Web/Browser</button>
+                            <button class="filter-chip" onclick="filterBench('Tabular')">Tabular</button>
+                            <button class="filter-chip" onclick="filterBench('Governance')">Governance</button>
+                        </div>
+                    </div>
+                    <div class="bench-table-wrap" id="bench-table-wrap">
+                        <div class="bench-empty">Click "Run All 30 Tests" to execute and grade the full benchmark suite.</div>
+                    </div>
+                </div>
+
+                <!-- Benchmark Telemetry -->
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <span class="section-label">BENCHMARK LOG</span>
+                    </div>
+                    <div id="bench-log" class="telemetry-feed">
+                        <div class="trace-empty-state">Benchmark execution log will appear here.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- SafeGuard Human-In-The-Loop Approval Modal -->
     <div id="approval-modal" class="modal-overlay hidden">
-        <div class="modal-content">
+        <div class="modal-content glass-modal">
             <div class="modal-header">
                 <div class="modal-badge-row">
-                    <span class="badge-critical">🛡️ SAFEGUARD HUMAN GATE</span>
+                    <span class="badge-critical pulse-badge">🛡️ SAFEGUARD HUMAN GATE</span>
                     <span class="badge-risk" id="modal-risk-badge">RISK: CRITICAL</span>
                 </div>
                 <h2 id="modal-title">Action Approval Required</h2>
@@ -159,8 +442,10 @@
                     <div class="diff-title text-muted">PRE-EXECUTION STATE (BEFORE)</div>
                     <pre id="modal-diff-before">{}</pre>
                 </div>
-                <div class="diff-arrow">→</div>
-                <div class="diff-box">
+                <div class="diff-arrow-wrap">
+                    <div class="diff-arrow">→</div>
+                </div>
+                <div class="diff-box diff-box-after">
                     <div class="diff-title text-gold">STAGED PAYLOAD (AFTER)</div>
                     <pre id="modal-diff-after">{}</pre>
                 </div>
@@ -178,11 +463,25 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn-danger" onclick="submitApproval('REJECT')">✕ Reject Action</button>
-                <button class="btn-warning" onclick="submitApproval('MODIFY')">✏️ Modify & Authorize</button>
-                <button class="btn-success" onclick="submitApproval('APPROVE')">✓ Authorize & Execute</button>
+                <div class="modal-timeout-bar">
+                    <div class="timeout-fill" id="timeout-fill"></div>
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn-danger" onclick="submitApproval('REJECT')">✕ Reject Action</button>
+                    <button class="btn-warning" onclick="submitApproval('MODIFY')">✏️ Modify & Authorize</button>
+                    <button class="btn-success" onclick="submitApproval('APPROVE')">✓ Authorize & Execute</button>
+                </div>
             </div>
         </div>
+    </div>
+
+    <!-- Trace Inspector Drawer -->
+    <div id="trace-drawer" class="trace-drawer hidden">
+        <div class="trace-drawer-header">
+            <span class="section-label">TRACE INSPECTOR</span>
+            <button class="trace-drawer-close" onclick="closeTraceDrawer()">✕</button>
+        </div>
+        <pre id="trace-drawer-content" class="trace-drawer-content"></pre>
     </div>
 
     <script src="/static/app.js"></script>

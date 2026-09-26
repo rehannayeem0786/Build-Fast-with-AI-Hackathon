@@ -1,0 +1,153 @@
+{
+  "workflow_id": "wf-23ad8a3d",
+  "goal": "Dispatch overdue notice email to the customer about invoice INV-2026-003",
+  "planner_mode": "HEURISTIC",
+  "planner_model": null,
+  "start_time": 1790409421.4538584,
+  "end_time": 1790409422.6937332,
+  "total_duration_sec": 1.24,
+  "status": "ABORTED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Query Billing Invoices",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_get_invoices",
+      "parameters": {
+        "status": "OVERDUE"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790409422.6601427,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790409422.6601427,
+      "duration_sec": 0.0,
+      "result": {
+        "count": 3,
+        "invoices": [
+          {
+            "id": "INV-2026-001",
+            "customer_email": "sarah.c@techcorp.io",
+            "amount_due": 4500.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-15",
+            "currency": "USD",
+            "items": [
+              "Enterprise Tier Monthly",
+              "Addon Seats x 10"
+            ]
+          },
+          {
+            "id": "INV-2026-003",
+            "customer_email": "psharma@solargrid.in",
+            "amount_due": 8900.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-10",
+            "currency": "USD",
+            "items": [
+              "IoT Gateway Connector Support"
+            ]
+          },
+          {
+            "id": "INV-2026-004",
+            "customer_email": "cbennett@cloudshield.net",
+            "amount_due": 3400.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-18",
+            "currency": "USD",
+            "items": [
+              "Cloud SOC Monitoring"
+            ]
+          }
+        ],
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Prepare Reminder Payload",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_prepare_reminder",
+      "parameters": {
+        "invoice_id": "{{step-1.result.invoices[0].id}}"
+      },
+      "risk_level": "MEDIUM",
+      "requires_approval": false,
+      "start_time": 1790409422.6601427,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790409422.6719582,
+          "level": "INFO",
+          "message": "Dataflow resolved 1 reference(s): step-2.invoice_id='INV-2026-001'",
+          "metadata": {
+            "resolved": {
+              "step-2.invoice_id": "INV-2026-001"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790409422.672712,
+      "duration_sec": 0.013,
+      "result": {
+        "to_email": "sarah.c@techcorp.io",
+        "subject": "Notice: Overdue Invoice INV-2026-001 for USD 4500.0",
+        "body": "Dear Customer,\n\nThis is a notification that invoice INV-2026-001 of amount USD 4500.0 was due on 2026-09-15.\n\nPlease remit payment at your earliest convenience.\n\nBest regards,\nFinance & Operations",
+        "invoice_details": {
+          "id": "INV-2026-001",
+          "customer_email": "sarah.c@techcorp.io",
+          "amount_due": 4500.0,
+          "status": "OVERDUE",
+          "due_date": "2026-09-15",
+          "currency": "USD",
+          "items": [
+            "Enterprise Tier Monthly",
+            "Addon Seats x 10"
+          ]
+        },
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-3",
+      "name": "Dispatch Outbound Email",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "email_send_reminder",
+      "parameters": {
+        "to_email": "psharma@solargrid.in",
+        "subject": "NexusFlow Notice regarding INV-2026-003",
+        "body": "Operational notice generated for goal: Dispatch overdue notice email to the customer about invoice INV-2026-003"
+      },
+      "risk_level": "CRITICAL",
+      "requires_approval": true,
+      "start_time": 1790409422.672712,
+      "status": "RUNNING",
+      "logs": [],
+      "retries": 0
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [
+    {
+      "workflow_id": "wf-23ad8a3d",
+      "step_id": "step-3",
+      "timestamp": 1790409422.6937332,
+      "decision": "REJECT",
+      "diff_before": {
+        "recipient": "psharma@solargrid.in",
+        "outbox_status": "DRAFT_QUEUED"
+      },
+      "diff_after": {
+        "recipient": "psharma@solargrid.in",
+        "subject": "NexusFlow Notice regarding INV-2026-003",
+        "outbox_status": "DISPATCHED_TO_SMTP"
+      }
+    }
+  ],
+  "cost_usd": 0.0
+}

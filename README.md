@@ -128,9 +128,10 @@ curl -X POST http://127.0.0.1:8000/api/workflow/<workflow_id>/undo
 
 | Layer | Command | What it proves |
 | :--- | :--- | :--- |
-| **Unit + integration tests (24)** | `python -m pytest tests/` | planner topology, MCP stdio roundtrip, real Chromium healing, HITL reject/timeout/modify, inter-step dataflow refs, rollback, LLM-planner validation (mocked), API endpoints |
+| **Unit + integration tests (25)** | `python -m pytest tests/` | planner topology, MCP stdio roundtrip, real Chromium healing, HITL reject/timeout/modify, inter-step dataflow refs (incl. forgiving path variants), rollback, LLM-planner validation (mocked), API endpoints |
 | **Benchmark-30 (contract-graded)** | `python run_eval.py` | end-to-end workflows: tools, statuses, gate decisions, MCP-verified postconditions |
 | **Live dashboard** | `python app/main.py` | human-visible demo: WebSocket traces, HITL modal, DOM mutation sandbox |
+| **Headless UI audit (22 browser checks)** | `python ui_audit.py` *(with the server running)* | real Chromium: page load, all tabs render, element presence, full workflow → `COMPLETED`, trace stream, undo button, benchmark-from-UI, **zero console/page errors** |
 
 ---
 
@@ -158,7 +159,8 @@ buildfastwithai/
 │   │   ├── benchmark_30.py     # 30 tasks + per-task verification contracts
 │   │   └── runner.py           # Contract grading, scripted HITL decisions, reports
 │   └── static/                 # Dashboard UI (DAG canvas, HITL modal, telemetry feed)
-├── tests/                      # 24 tests (conftest keeps them offline/deterministic)
+├── tests/                      # 25 tests (conftest keeps them offline/deterministic)
+├── ui_audit.py                 # headless-Chromium UI audit (22 checks, zero-error gate)
 ├── eval/reports/               # BENCHMARK_REPORT.md, summary JSON, run traces, healing memory
 ├── .env                        # Your keys (gitignored) · .env.example = template
 ├── Dockerfile · render.yaml    # One-click cloud deployment
@@ -188,6 +190,14 @@ playwright install chromium
 ### 2. Run Test Suite
 ```bash
 python -m pytest tests/
+```
+
+### 2b. Headless UI audit (optional — verifies the dashboard in a real browser)
+```bash
+# terminal 1: start the server on the audit's port
+python -m uvicorn app.main:app --port 8021
+# terminal 2: run the audit (22 checks, fails loudly on any console error)
+python ui_audit.py
 ```
 
 ### 3. Run Benchmark-30 Evaluation

@@ -1,0 +1,228 @@
+{
+  "workflow_id": "wf-a511061b",
+  "goal": "Fetch top-tier qualified leads with score >= 90 from CRM, create $110,000 enterprise deal, sync to executive sheet, and dispatch contract notice",
+  "planner_mode": "LLM",
+  "planner_model": "groq:openai/gpt-oss-120b",
+  "start_time": 1790407810.6223605,
+  "end_time": 1790407930.6276138,
+  "total_duration_sec": 120.005,
+  "status": "ABORTED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Fetch qualified leads",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_get_leads",
+      "parameters": {
+        "status": "QUALIFIED",
+        "min_score": 90
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790407810.6248217,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790407810.6248217,
+      "duration_sec": 0.0,
+      "result": {
+        "count": 1,
+        "leads": [
+          {
+            "id": "LEAD-104",
+            "name": "Priya Sharma",
+            "email": "psharma@solargrid.in",
+            "company": "SolarGrid India",
+            "score": 96,
+            "status": "DEAL_CREATED",
+            "deal_value": 110000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-24"
+          }
+        ],
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Create enterprise deal",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_create_deal",
+      "parameters": {
+        "lead_id": "{{step-1.result.leads[0].id}}",
+        "title": "Enterprise Deal",
+        "amount": 110000,
+        "stage": "Contract Review"
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790407810.6248217,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790407810.6248217,
+          "level": "INFO",
+          "message": "Dataflow resolved 1 reference(s): step-2.lead_id='LEAD-104'",
+          "metadata": {
+            "resolved": {
+              "step-2.lead_id": "LEAD-104"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790407810.6248217,
+      "duration_sec": 0.0,
+      "result": {
+        "success": true,
+        "deal": {
+          "id": "DEAL-504",
+          "lead_id": "LEAD-104",
+          "title": "Enterprise Deal",
+          "amount": 110000,
+          "stage": "Contract Review",
+          "probability": 0.5,
+          "close_date": "2026-10-30"
+        },
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-3",
+      "name": "Update lead status",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_update_lead",
+      "parameters": {
+        "lead_id": "{{step-1.result.leads[0].id}}",
+        "updates": {
+          "status": "DEAL_CREATED",
+          "deal_value": 110000
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790407810.6248217,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790407810.6248217,
+          "level": "INFO",
+          "message": "Dataflow resolved 1 reference(s): step-3.lead_id='LEAD-104'",
+          "metadata": {
+            "resolved": {
+              "step-3.lead_id": "LEAD-104"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790407810.6248217,
+      "duration_sec": 0.0,
+      "result": {
+        "success": true,
+        "lead_id": "LEAD-104",
+        "updated_lead": {
+          "id": "LEAD-104",
+          "name": "Priya Sharma",
+          "email": "psharma@solargrid.in",
+          "company": "SolarGrid India",
+          "score": 96,
+          "status": "DEAL_CREATED",
+          "deal_value": 110000,
+          "assigned_rep": "Elena Rostova",
+          "last_contact": "2026-09-24"
+        },
+        "before": {
+          "id": "LEAD-104",
+          "name": "Priya Sharma",
+          "email": "psharma@solargrid.in",
+          "company": "SolarGrid India",
+          "score": 96,
+          "status": "QUALIFIED",
+          "deal_value": 110000,
+          "assigned_rep": "Elena Rostova",
+          "last_contact": "2026-09-24"
+        },
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-4",
+      "name": "Sync to executive sheet",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "sheets_append_row",
+      "parameters": {
+        "sheet_name": "Enterprise Deals",
+        "row_data": {
+          "lead_id": "{{step-1.result.leads[0].id}}",
+          "lead_name": "{{step-1.result.leads[0].name}}",
+          "lead_email": "{{step-1.result.leads[0].email}}",
+          "deal_id": "{{step-2.result.deal_id}}",
+          "amount": 110000,
+          "stage": "Contract Review"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790407810.6248217,
+      "status": "FAILED",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790407810.6248217,
+      "duration_sec": 0.0,
+      "result": null,
+      "error": "Unresolved parameter reference '{{step-2.result.deal_id}}' in step 'step-4' (step-4.row_data.deal_id): no value in completed earlier steps ['step-1', 'step-2', 'step-3']. Reference upstream results, e.g. {{step-1.result.invoices[0].id}}."
+    },
+    {
+      "step_id": "step-5",
+      "name": "Dispatch contract notice",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "email_send_reminder",
+      "parameters": {
+        "to_email": "{{step-1.result.leads[0].email}}",
+        "subject": "Contract Notice for Enterprise Deal",
+        "body": "Dear {{step-1.result.leads[0].name}},\n\nWe are pleased to inform you that a contract has been created for an enterprise deal (ID: {{step-2.result.deal_id}}) valued at $110,000. Please review the attached contract.\n\nBest regards,\nSales Team"
+      },
+      "risk_level": "CRITICAL",
+      "requires_approval": true,
+      "start_time": 1790407810.6248217,
+      "status": "RUNNING",
+      "logs": [
+        {
+          "timestamp": 1790407810.6248217,
+          "level": "INFO",
+          "message": "Dataflow resolved 2 reference(s): step-5.to_email='psharma@solargrid.in', step-5.body='Priya Sharma'",
+          "metadata": {
+            "resolved": {
+              "step-5.to_email": "psharma@solargrid.in",
+              "step-5.body": "Priya Sharma"
+            }
+          }
+        }
+      ],
+      "retries": 0
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [
+    {
+      "workflow_id": "wf-a511061b",
+      "step_id": "step-5",
+      "timestamp": 1790407930.6276138,
+      "decision": "REJECT",
+      "diff_before": {
+        "recipient": "psharma@solargrid.in",
+        "outbox_status": "DRAFT_QUEUED"
+      },
+      "diff_after": {
+        "recipient": "psharma@solargrid.in",
+        "subject": "Contract Notice for Enterprise Deal",
+        "outbox_status": "DISPATCHED_TO_SMTP"
+      }
+    }
+  ],
+  "cost_usd": 0.25
+}

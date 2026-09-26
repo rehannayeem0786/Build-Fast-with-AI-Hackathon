@@ -1,0 +1,122 @@
+{
+  "workflow_id": "wf-136c46d6",
+  "goal": "Reviewer modifies payment amount in diff modal before approval; verify updated parameters execute cleanly.",
+  "planner_mode": "HEURISTIC",
+  "planner_model": null,
+  "start_time": 1790410284.3902404,
+  "end_time": 1790410284.4376214,
+  "total_duration_sec": 0.047,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Query Billing Invoices",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_get_invoices",
+      "parameters": {
+        "status": "PENDING"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790410284.3902404,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790410284.405987,
+      "duration_sec": 0.016,
+      "result": {
+        "count": 1,
+        "invoices": [
+          {
+            "id": "INV-2026-005",
+            "customer_email": "dkim@quantumops.ai",
+            "amount_due": 1500.0,
+            "status": "PENDING",
+            "due_date": "2026-09-30",
+            "currency": "USD",
+            "items": [
+              "Starter License Pack"
+            ]
+          }
+        ],
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Charge Customer Invoice",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_charge_invoice",
+      "parameters": {
+        "invoice_id": "INV-2026-003",
+        "amount": 1234.56
+      },
+      "risk_level": "CRITICAL",
+      "requires_approval": true,
+      "start_time": 1790410284.4080055,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790410284.4376214,
+      "duration_sec": 0.03,
+      "result": {
+        "success": true,
+        "transaction": {
+          "txn_id": "TXN-1790410284437",
+          "invoice_id": "INV-2026-003",
+          "amount": 8900.0,
+          "currency": "USD",
+          "status": "SUCCESS",
+          "payment_method": "card_auto"
+        },
+        "invoice": {
+          "id": "INV-2026-003",
+          "customer_email": "psharma@solargrid.in",
+          "amount_due": 8900.0,
+          "status": "PAID",
+          "due_date": "2026-09-10",
+          "currency": "USD",
+          "items": [
+            "IoT Gateway Connector Support"
+          ],
+          "paid_at": "2026-09-26 13:41:24"
+        },
+        "before": {
+          "id": "INV-2026-003",
+          "customer_email": "psharma@solargrid.in",
+          "amount_due": 8900.0,
+          "status": "OVERDUE",
+          "due_date": "2026-09-10",
+          "currency": "USD",
+          "items": [
+            "IoT Gateway Connector Support"
+          ]
+        },
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [
+    {
+      "workflow_id": "wf-136c46d6",
+      "step_id": "step-2",
+      "timestamp": 1790410284.4376214,
+      "decision": "MODIFY",
+      "diff_before": {
+        "invoice_id": "INV-2026-003",
+        "status": "OVERDUE",
+        "payment_action": "PENDING"
+      },
+      "diff_after": {
+        "invoice_id": "INV-2026-003",
+        "status": "PAID",
+        "charge_amount": 8900.0,
+        "method": "card_auto"
+      }
+    }
+  ],
+  "cost_usd": 0.0
+}

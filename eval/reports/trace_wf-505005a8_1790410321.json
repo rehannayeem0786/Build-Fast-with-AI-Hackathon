@@ -1,0 +1,112 @@
+{
+  "workflow_id": "wf-505005a8",
+  "goal": "Compile all invoices > 14 days overdue into a high-priority executive risk briefing.",
+  "planner_mode": "HEURISTIC",
+  "planner_model": null,
+  "start_time": 1790410321.592548,
+  "end_time": 1790410321.601486,
+  "total_duration_sec": 0.009,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Query Billing Invoices",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_get_invoices",
+      "parameters": {
+        "status": "OVERDUE"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790410321.592548,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790410321.5974739,
+      "duration_sec": 0.005,
+      "result": {
+        "count": 3,
+        "invoices": [
+          {
+            "id": "INV-2026-001",
+            "customer_email": "sarah.c@techcorp.io",
+            "amount_due": 4500.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-15",
+            "currency": "USD",
+            "items": [
+              "Enterprise Tier Monthly",
+              "Addon Seats x 10"
+            ]
+          },
+          {
+            "id": "INV-2026-003",
+            "customer_email": "psharma@solargrid.in",
+            "amount_due": 8900.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-10",
+            "currency": "USD",
+            "items": [
+              "IoT Gateway Connector Support"
+            ]
+          },
+          {
+            "id": "INV-2026-004",
+            "customer_email": "cbennett@cloudshield.net",
+            "amount_due": 3400.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-18",
+            "currency": "USD",
+            "items": [
+              "Cloud SOC Monitoring"
+            ]
+          }
+        ],
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Update Tracking Sheet",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "sheets_append_row",
+      "parameters": {
+        "sheet_name": "Executive Ops Summary",
+        "row_data": {
+          "Account": "SolarGrid India",
+          "Region": "APAC",
+          "ARR": 14000.0,
+          "Health": "Amber",
+          "Action Required": "Auto: Compile all invoices > 14 days overdue into a hi"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790410321.5974739,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790410321.601486,
+      "duration_sec": 0.004,
+      "result": {
+        "success": true,
+        "sheet_name": "Executive Ops Summary",
+        "row_number": 7,
+        "data": {
+          "Row": 7,
+          "Account": "SolarGrid India",
+          "Region": "APAC",
+          "ARR": 14000.0,
+          "Health": "Amber",
+          "Action Required": "Auto: Compile all invoices > 14 days overdue into a hi"
+        },
+        "_transport": "MCP_STDIO"
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [],
+  "cost_usd": 0.0
+}

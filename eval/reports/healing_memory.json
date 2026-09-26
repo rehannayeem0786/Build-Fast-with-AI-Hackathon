@@ -1,10 +1,10 @@
 {
   "http://localhost:8000/portal::submit lead sync": {
     "selector": "text=Confirm & Synchronize Record",
-    "learned_at": 1790372586.9106343
+    "learned_at": 1790410325.6856034
   },
   "http://localhost:8000/portal::submit lead sync v2": {
     "selector": "text=Confirm & Synchronize Record",
-    "learned_at": 1790372566.6582816
+    "learned_at": 1790410263.2434895
   }
 }

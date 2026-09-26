@@ -1,4 +1,4 @@
-﻿import json
+import json
 import re
 import time
 import uuid
@@ -29,6 +29,8 @@ Rules:
   strings, no comments, no explanation entries.
 - If a step's parameters reference another step, that referenced step MUST
   appear in its "dependencies".
+- Use the exact result paths documented in each tool description; when you
+  reference a field, copy its path from the return shape shown there.
 - Output JSON only. No prose, no markdown fences."""
 
 
@@ -63,9 +65,11 @@ class GoalToDAGPlanner:
         if llm_configured and not self.force_heuristic:
             try:
                 steps = self._plan_with_llm(goal)
-                if steps:
+                if steps and len(steps) >= 2:
                     self.last_mode = "LLM"
                     self.last_model = self._last_used_model or "llm:configured"
+                elif steps and len(steps) < 2:
+                    steps = None  # LLM collapsed the plan; fall back
             except Exception:
                 steps = None  # fall back to heuristic planner
 
@@ -232,8 +236,6 @@ class GoalToDAGPlanner:
             except Exception:
                 return None
         return None
-
-        return dag
 
 
     # ------------------------------------------------------------------

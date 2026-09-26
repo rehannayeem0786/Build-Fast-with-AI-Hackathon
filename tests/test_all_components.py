@@ -421,6 +421,25 @@ def test_unresolved_reference_fails_fast():
         orchestrator._resolve_parameters(p, dag)
 
 
+def test_path_variant_reference_resolution():
+    """Model guesses like result.deal_id resolve to result.deal.id."""
+    deal_step = WorkflowStep(
+        id="step-1", name="create deal", description="", tool_type=ToolType.MCP_TOOL,
+        tool_name="crm_create_deal", status=StepStatus.SUCCESS,
+        result={"success": True, "deal": {"id": "DEAL-504", "lead_id": "LEAD-104"}})
+    log_step = WorkflowStep(
+        id="step-2", name="log", description="", tool_type=ToolType.MCP_TOOL,
+        tool_name="sheets_append_row", status=StepStatus.RUNNING,
+        parameters={"row_data": {"deal_id": "{{step-1.result.deal_id}}",
+                                 "lead": "{{step-1.result.deal.lead_id}}"}})
+    dag = WorkflowDAG(workflow_id="wf-pv", goal="g",
+                      steps=[deal_step, log_step], total_steps=2)
+
+    resolved, _mapping = orchestrator._resolve_parameters(log_step, dag)
+    assert resolved["row_data"]["deal_id"] == "DEAL-504"   # deal_id -> deal.id
+    assert resolved["row_data"]["lead"] == "LEAD-104"       # exact nested path
+
+
 async def test_dataflow_reference_end_to_end():
     """A plan wired with {{step-1.result...}} executes and passes the value."""
     q = WorkflowStep(
