@@ -19,3 +19,9 @@ Thumbs.db
 
 # Debug scratch
 dbg.py
+
+# Presentation artifacts (deck + generator — not part of submission code)
+*.pptx
+*.pdf
+ppt_render/
+build_final_ppt.py

@@ -161,8 +161,6 @@ buildfastwithai/
 │   └── static/                 # Dashboard UI (DAG canvas, HITL modal, telemetry feed)
 ├── tests/                      # 25 tests (conftest keeps them offline/deterministic)
 ├── ui_audit.py                 # headless-Chromium UI audit (22 checks, zero-error gate)
-├── build_final_ppt.py          # Generates the 10-slide final-submission deck (design system)
-├── NexusFlow_AI_FinalSubmission_10Slides.pptx  # Final submission deck (+ .pdf companion)
 ├── eval/reports/               # BENCHMARK_REPORT.md, summary JSON, run traces, healing memory
 ├── .env                        # Your keys (gitignored) · .env.example = template
 ├── Dockerfile · render.yaml    # One-click cloud deployment
