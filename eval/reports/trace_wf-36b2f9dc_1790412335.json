@@ -1,0 +1,233 @@
+{
+  "workflow_id": "wf-36b2f9dc",
+  "goal": "Fetch top-tier qualified leads with score >= 90 from CRM, create $110,000 enterprise deal, sync to executive sheet, and dispatch contract notice",
+  "planner_mode": "LLM",
+  "planner_model": "groq:openai/gpt-oss-120b",
+  "start_time": 1790412318.5585132,
+  "end_time": 1790412335.1313963,
+  "total_duration_sec": 16.573,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Fetch top-tier leads",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_get_leads",
+      "parameters": {
+        "min_score": 90
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790412318.565541,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790412318.565541,
+      "duration_sec": 0.0,
+      "result": {
+        "count": 3,
+        "leads": [
+          {
+            "id": "LEAD-102",
+            "name": "Marcus Vance",
+            "email": "mvance@apexscale.com",
+            "company": "ApexScale",
+            "score": 94,
+            "status": "PROPOSAL_SENT",
+            "deal_value": 78000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-22"
+          },
+          {
+            "id": "LEAD-104",
+            "name": "Priya Sharma",
+            "email": "psharma@solargrid.in",
+            "company": "SolarGrid India",
+            "score": 96,
+            "status": "QUALIFIED",
+            "deal_value": 110000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-24",
+            "notes": "Hardware inventory: [{\"SKU ID\": \"SKU-8812\", \"Product Title\": \"Industrial Optical Sensor Hub\", \"Inventory Status\": \"In Stock\", \"Price\": \"$1,450.00\"}, {\"SKU ID\": \"SKU-8813\", \"Product Title\": \"Edge Compute Node A100\", \"Inventory Status\": \"Low Stock (2 remaining)\", \"Price\": \"$9,800.00\"}]"
+          },
+          {
+            "id": "LEAD-106",
+            "name": "Chloe Bennett",
+            "email": "cbennett@cloudshield.net",
+            "company": "CloudShield",
+            "score": 91,
+            "status": "NEGOTIATION",
+            "deal_value": 62000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-23"
+          }
+        ],
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Create enterprise deal",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_create_deal",
+      "parameters": {
+        "lead_id": "{{step-1.result.leads[0].id}}",
+        "title": "Enterprise Deal",
+        "amount": 110000,
+        "stage": "Contract Review"
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790412318.5665455,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790412318.5685534,
+          "level": "INFO",
+          "message": "Dataflow resolved 1 reference(s): step-2.lead_id='LEAD-102'",
+          "metadata": {
+            "resolved": {
+              "step-2.lead_id": "LEAD-102"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790412318.5725985,
+      "duration_sec": 0.006,
+      "result": {
+        "success": true,
+        "deal": {
+          "id": "DEAL-504",
+          "lead_id": "LEAD-102",
+          "title": "Enterprise Deal",
+          "amount": 110000,
+          "stage": "Contract Review",
+          "probability": 0.5,
+          "close_date": "2026-10-30"
+        },
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-3",
+      "name": "Sync deal to executive sheet",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "sheets_append_row",
+      "parameters": {
+        "sheet_name": "Executive Deals",
+        "row_data": {
+          "Lead ID": "{{step-1.result.leads[0].id}}",
+          "Lead Name": "{{step-1.result.leads[0].name}}",
+          "Lead Email": "{{step-1.result.leads[0].email}}",
+          "Lead Score": "{{step-1.result.leads[0].score}}",
+          "Deal ID": "{{step-2.result.deal.id}}",
+          "Deal Amount": 110000,
+          "Stage": "Contract Review"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790412318.5746362,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790412318.5746362,
+          "level": "INFO",
+          "message": "Dataflow resolved 5 reference(s): step-3.row_data.Lead ID='LEAD-102', step-3.row_data.Lead Name='Marcus Vance', step-3.row_data.Lead Email='mvance@apexscale.com', step-3.row_data.Lead Score=94",
+          "metadata": {
+            "resolved": {
+              "step-3.row_data.Lead ID": "LEAD-102",
+              "step-3.row_data.Lead Name": "Marcus Vance",
+              "step-3.row_data.Lead Email": "mvance@apexscale.com",
+              "step-3.row_data.Lead Score": "94",
+              "step-3.row_data.Deal ID": "DEAL-504"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790412318.5746362,
+      "duration_sec": 0.0,
+      "result": {
+        "success": true,
+        "sheet_name": "Executive Deals",
+        "row_number": 1,
+        "data": {
+          "Row": 1,
+          "Lead ID": "LEAD-102",
+          "Lead Name": "Marcus Vance",
+          "Lead Email": "mvance@apexscale.com",
+          "Lead Score": 94,
+          "Deal ID": "DEAL-504",
+          "Deal Amount": 110000,
+          "Stage": "Contract Review"
+        },
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-4",
+      "name": "Dispatch contract notice",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "email_send_reminder",
+      "parameters": {
+        "to_email": "{{step-1.result.leads[0].email}}",
+        "subject": "Contract Notice for Enterprise Deal",
+        "body": "Dear {{step-1.result.leads[0].name}},\n\nWe are pleased to inform you that a deal (ID: {{step-2.result.deal.id}}) worth $110,000 has been created and is now in the Contract Review stage.\n\nPlease review the attached contract.\n\nBest regards,\nSales Team"
+      },
+      "risk_level": "CRITICAL",
+      "requires_approval": true,
+      "start_time": 1790412318.5746362,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790412318.5766513,
+          "level": "INFO",
+          "message": "Dataflow resolved 2 reference(s): step-4.to_email='mvance@apexscale.com', step-4.body='DEAL-504'",
+          "metadata": {
+            "resolved": {
+              "step-4.to_email": "mvance@apexscale.com",
+              "step-4.body": "DEAL-504"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790412335.1024935,
+      "duration_sec": 16.528,
+      "result": {
+        "dispatched": true,
+        "timestamp": 1790412335.1024935,
+        "message_id": "MSG-1790412335102",
+        "to": "mvance@apexscale.com",
+        "subject": "Contract Notice for Enterprise Deal",
+        "status": "SENT_VIA_MOCK_SMTP",
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [
+    {
+      "workflow_id": "wf-36b2f9dc",
+      "step_id": "step-4",
+      "timestamp": 1790412335.1024935,
+      "decision": "APPROVE",
+      "diff_before": {
+        "recipient": "mvance@apexscale.com",
+        "outbox_status": "DRAFT_QUEUED"
+      },
+      "diff_after": {
+        "recipient": "mvance@apexscale.com",
+        "subject": "Contract Notice for Enterprise Deal",
+        "outbox_status": "DISPATCHED_TO_SMTP"
+      }
+    }
+  ],
+  "cost_usd": 0.21
+}

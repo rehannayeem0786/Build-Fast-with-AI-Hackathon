@@ -1,0 +1,204 @@
+{
+  "workflow_id": "wf-e34bf4cd",
+  "goal": "Navigate to web portal, scrape hardware inventory records, enrich CRM lead LEAD-104, and submit onboarding form under mutated DOM",
+  "planner_mode": "LLM",
+  "planner_model": "groq:openai/gpt-oss-120b",
+  "start_time": 1790412541.3347595,
+  "end_time": 1790412545.1746078,
+  "total_duration_sec": 3.84,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Scrape hardware inventory",
+      "tool_type": "BROWSER",
+      "tool_name": "scrape_table",
+      "parameters": {
+        "url": "https://portal.example.com/hardware",
+        "selector": "table#inventory"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790412541.3387918,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790412543.3065634,
+      "duration_sec": 1.968,
+      "result": {
+        "rows": [
+          {
+            "SKU ID": "SKU-8812",
+            "Product Title": "Industrial Optical Sensor Hub",
+            "Inventory Status": "In Stock",
+            "Price": "$1,450.00"
+          },
+          {
+            "SKU ID": "SKU-8813",
+            "Product Title": "Edge Compute Node A100",
+            "Inventory Status": "Low Stock (2 remaining)",
+            "Price": "$9,800.00"
+          }
+        ],
+        "count": 2,
+        "engine": "PLAYWRIGHT"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Fetch CRM lead",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_get_lead_by_id",
+      "parameters": {
+        "lead_id": "LEAD-104"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790412541.5596333,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790412541.5596333,
+      "duration_sec": 0.0,
+      "result": {
+        "found": true,
+        "lead": {
+          "id": "LEAD-104",
+          "name": "Priya Sharma",
+          "email": "psharma@solargrid.in",
+          "company": "SolarGrid India",
+          "score": 96,
+          "status": "QUALIFIED",
+          "deal_value": 110000,
+          "assigned_rep": "Elena Rostova",
+          "last_contact": "2026-09-24",
+          "notes": "Inventory record: {\"SKU ID\": \"SKU-8812\", \"Product Title\": \"Industrial Optical Sensor Hub\", \"Inventory Status\": \"In Stock\", \"Price\": \"$1,450.00\"}"
+        },
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-3",
+      "name": "Enrich lead with inventory",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_update_lead",
+      "parameters": {
+        "lead_id": "{{step-2.result.lead.id}}",
+        "updates": {
+          "notes": "Inventory record: {{step-1.result.rows[0]}}"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790412543.3085878,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790412543.3085878,
+          "level": "INFO",
+          "message": "Dataflow resolved 2 reference(s): step-3.lead_id='LEAD-104', step-3.updates.notes={'SKU ID': 'SKU-8812', 'Product Title': 'Industrial Optical Sensor Hub', 'Inventory Status': 'In Stock', 'Price': '$1,450.00'}",
+          "metadata": {
+            "resolved": {
+              "step-3.lead_id": "LEAD-104",
+              "step-3.updates.notes": "{'SKU ID': 'SKU-8812', 'Product Title': 'Industrial Optical Sensor Hub', 'Inventory Status': 'In Stock', 'Price': '$1,450.00'}"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790412543.3085878,
+      "duration_sec": 0.0,
+      "result": {
+        "success": true,
+        "lead_id": "LEAD-104",
+        "updated_lead": {
+          "id": "LEAD-104",
+          "name": "Priya Sharma",
+          "email": "psharma@solargrid.in",
+          "company": "SolarGrid India",
+          "score": 96,
+          "status": "QUALIFIED",
+          "deal_value": 110000,
+          "assigned_rep": "Elena Rostova",
+          "last_contact": "2026-09-24",
+          "notes": "Inventory record: {\"SKU ID\": \"SKU-8812\", \"Product Title\": \"Industrial Optical Sensor Hub\", \"Inventory Status\": \"In Stock\", \"Price\": \"$1,450.00\"}"
+        },
+        "before": {
+          "id": "LEAD-104",
+          "name": "Priya Sharma",
+          "email": "psharma@solargrid.in",
+          "company": "SolarGrid India",
+          "score": 96,
+          "status": "QUALIFIED",
+          "deal_value": 110000,
+          "assigned_rep": "Elena Rostova",
+          "last_contact": "2026-09-24"
+        },
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-4",
+      "name": "Submit onboarding form",
+      "tool_type": "BROWSER",
+      "tool_name": "fill_form_and_click",
+      "parameters": {
+        "url": "https://portal.example.com/onboarding",
+        "form_data": {
+          "lead_id": "{{step-2.result.lead.id}}",
+          "inventory": "{{step-1.result.rows[0]}}",
+          "status": "Enriched"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790412543.3085878,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790412543.3085878,
+          "level": "INFO",
+          "message": "Dataflow resolved 2 reference(s): step-4.form_data.lead_id='LEAD-104', step-4.form_data.inventory={'SKU ID': 'SKU-8812', 'Product Title': 'Industrial Optical Sensor Hub', 'Inventory Status': 'In Stock', 'Price': '$1,450.00'}",
+          "metadata": {
+            "resolved": {
+              "step-4.form_data.lead_id": "LEAD-104",
+              "step-4.form_data.inventory": "{'SKU ID': 'SKU-8812', 'Product Title': 'Industrial Optical Sensor Hub', 'Inventory Status': 'In Stock', 'Price': '$1,450.00'}"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790412545.1746078,
+      "duration_sec": 1.866,
+      "result": {
+        "success": true,
+        "self_healed": false,
+        "strategy": "EXACT_SELECTOR",
+        "engine": "PLAYWRIGHT",
+        "executed_selector": "#submit-lead-btn",
+        "filled_fields": [],
+        "clicked": true,
+        "click_error": null,
+        "dom_feedback": "Lead Submitted Successfully to Pipeline!",
+        "submitted_payload": {
+          "lead_id": "LEAD-104",
+          "inventory": {
+            "SKU ID": "SKU-8812",
+            "Product Title": "Industrial Optical Sensor Hub",
+            "Inventory Status": "In Stock",
+            "Price": "$1,450.00"
+          },
+          "status": "Enriched"
+        },
+        "result_message": "Lead record submitted via real Chromium click."
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [],
+  "cost_usd": 0.21
+}

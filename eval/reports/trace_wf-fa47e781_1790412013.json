@@ -1,0 +1,324 @@
+{
+  "workflow_id": "wf-fa47e781",
+  "goal": "Reconcile overdue invoices in Stripe with HubSpot leads, update the tracking sheet, and queue reminder emails for approval",
+  "planner_mode": "LLM",
+  "planner_model": "groq:openai/gpt-oss-120b",
+  "start_time": 1790412013.6827064,
+  "end_time": 1790412013.6920094,
+  "total_duration_sec": 0.009,
+  "status": "COMPLETED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Fetch overdue invoices",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_get_invoices",
+      "parameters": {
+        "status": "OVERDUE"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790412013.6912692,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790412013.6912692,
+      "duration_sec": 0.0,
+      "result": {
+        "count": 3,
+        "invoices": [
+          {
+            "id": "INV-2026-001",
+            "customer_email": "sarah.c@techcorp.io",
+            "amount_due": 4500.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-15",
+            "currency": "USD",
+            "items": [
+              "Enterprise Tier Monthly",
+              "Addon Seats x 10"
+            ]
+          },
+          {
+            "id": "INV-2026-003",
+            "customer_email": "psharma@solargrid.in",
+            "amount_due": 8900.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-10",
+            "currency": "USD",
+            "items": [
+              "IoT Gateway Connector Support"
+            ]
+          },
+          {
+            "id": "INV-2026-004",
+            "customer_email": "cbennett@cloudshield.net",
+            "amount_due": 3400.0,
+            "status": "OVERDUE",
+            "due_date": "2026-09-18",
+            "currency": "USD",
+            "items": [
+              "Cloud SOC Monitoring"
+            ]
+          }
+        ],
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Fetch CRM leads",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_get_leads",
+      "parameters": {},
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790412013.6920094,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790412013.6920094,
+      "duration_sec": 0.0,
+      "result": {
+        "count": 6,
+        "leads": [
+          {
+            "id": "LEAD-101",
+            "name": "Sarah Chen",
+            "email": "sarah.c@techcorp.io",
+            "company": "TechCorp",
+            "score": 88,
+            "status": "OVERDUE_INVOICE",
+            "deal_value": 45000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-20",
+            "notes": "Invoice INV-2026-001 overdue"
+          },
+          {
+            "id": "LEAD-102",
+            "name": "Marcus Vance",
+            "email": "mvance@apexscale.com",
+            "company": "ApexScale",
+            "score": 94,
+            "status": "PROPOSAL_SENT",
+            "deal_value": 78000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-22"
+          },
+          {
+            "id": "LEAD-103",
+            "name": "David Kim",
+            "email": "dkim@quantumops.ai",
+            "company": "QuantumOps",
+            "score": 72,
+            "status": "CONTACTED",
+            "deal_value": 30000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-18"
+          },
+          {
+            "id": "LEAD-104",
+            "name": "Priya Sharma",
+            "email": "psharma@solargrid.in",
+            "company": "SolarGrid India",
+            "score": 96,
+            "status": "QUALIFIED",
+            "deal_value": 110000,
+            "assigned_rep": "Elena Rostova",
+            "last_contact": "2026-09-24"
+          },
+          {
+            "id": "LEAD-105",
+            "name": "Jason Bourne",
+            "email": "jbourne@treadstone.org",
+            "company": "Treadstone Media",
+            "score": 45,
+            "status": "COLD",
+            "deal_value": 15000,
+            "assigned_rep": "Unassigned",
+            "last_contact": "2026-08-10"
+          },
+          {
+            "id": "LEAD-106",
+            "name": "Chloe Bennett",
+            "email": "cbennett@cloudshield.net",
+            "company": "CloudShield",
+            "score": 91,
+            "status": "NEGOTIATION",
+            "deal_value": 62000,
+            "assigned_rep": "Alex Rivera",
+            "last_contact": "2026-09-23"
+          }
+        ],
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-3",
+      "name": "Prepare reminder email payload",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "billing_prepare_reminder",
+      "parameters": {
+        "invoice_id": "{{step-1.result.invoices[0].id}}"
+      },
+      "risk_level": "MEDIUM",
+      "requires_approval": false,
+      "start_time": 1790412013.6920094,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790412013.6920094,
+          "level": "INFO",
+          "message": "Dataflow resolved 1 reference(s): step-3.invoice_id='INV-2026-001'",
+          "metadata": {
+            "resolved": {
+              "step-3.invoice_id": "INV-2026-001"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790412013.6920094,
+      "duration_sec": 0.0,
+      "result": {
+        "to_email": "sarah.c@techcorp.io",
+        "subject": "Notice: Overdue Invoice INV-2026-001 for USD 4500.0",
+        "body": "Dear Customer,\n\nThis is a notification that invoice INV-2026-001 of amount USD 4500.0 was due on 2026-09-15.\n\nPlease remit payment at your earliest convenience.\n\nBest regards,\nFinance & Operations",
+        "invoice_details": {
+          "id": "INV-2026-001",
+          "customer_email": "sarah.c@techcorp.io",
+          "amount_due": 4500.0,
+          "status": "OVERDUE",
+          "due_date": "2026-09-15",
+          "currency": "USD",
+          "items": [
+            "Enterprise Tier Monthly",
+            "Addon Seats x 10"
+          ]
+        },
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-5",
+      "name": "Update lead status in CRM",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_update_lead",
+      "parameters": {
+        "lead_id": "{{step-2.result.leads[0].id}}",
+        "updates": {
+          "status": "OVERDUE_INVOICE",
+          "notes": "Invoice {{step-1.result.invoices[0].id}} overdue"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790412013.6920094,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790412013.6920094,
+          "level": "INFO",
+          "message": "Dataflow resolved 2 reference(s): step-5.lead_id='LEAD-101', step-5.updates.notes='INV-2026-001'",
+          "metadata": {
+            "resolved": {
+              "step-5.lead_id": "LEAD-101",
+              "step-5.updates.notes": "INV-2026-001"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790412013.6920094,
+      "duration_sec": 0.0,
+      "result": {
+        "success": true,
+        "lead_id": "LEAD-101",
+        "updated_lead": {
+          "id": "LEAD-101",
+          "name": "Sarah Chen",
+          "email": "sarah.c@techcorp.io",
+          "company": "TechCorp",
+          "score": 88,
+          "status": "OVERDUE_INVOICE",
+          "deal_value": 45000,
+          "assigned_rep": "Alex Rivera",
+          "last_contact": "2026-09-20",
+          "notes": "Invoice INV-2026-001 overdue"
+        },
+        "before": {
+          "id": "LEAD-101",
+          "name": "Sarah Chen",
+          "email": "sarah.c@techcorp.io",
+          "company": "TechCorp",
+          "score": 88,
+          "status": "QUALIFIED",
+          "deal_value": 45000,
+          "assigned_rep": "Alex Rivera",
+          "last_contact": "2026-09-20"
+        },
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-4",
+      "name": "Append reconciliation row to tracking sheet",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "sheets_append_row",
+      "parameters": {
+        "sheet_name": "Invoice_Reconciliation",
+        "row_data": {
+          "invoice_id": "{{step-1.result.invoices[0].id}}",
+          "customer_email": "{{step-1.result.invoices[0].customer_email}}",
+          "lead_id": "{{step-2.result.leads[0].id}}",
+          "reminder_body": "{{step-3.result.body}}",
+          "status": "Pending"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790412013.6920094,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790412013.6920094,
+          "level": "INFO",
+          "message": "Dataflow resolved 4 reference(s): step-4.row_data.invoice_id='INV-2026-001', step-4.row_data.customer_email='sarah.c@techcorp.io', step-4.row_data.lead_id='LEAD-101', step-4.row_data.reminder_body='Dear Customer,\\n\\nThis is a notification that invoice INV-2026-001 of amount USD 4500.0 was due on 2026-09-15.\\n\\nPlease remit payment at your earliest convenience.\\n\\nBest regards,\\nFinance & Operations'",
+          "metadata": {
+            "resolved": {
+              "step-4.row_data.invoice_id": "INV-2026-001",
+              "step-4.row_data.customer_email": "sarah.c@techcorp.io",
+              "step-4.row_data.lead_id": "LEAD-101",
+              "step-4.row_data.reminder_body": "Dear Customer,\n\nThis is a notification that invoice INV-2026-001 of amount USD 4500.0 was due on 2026-09-15.\n\nPlease remit payment at your earliest convenience.\n\nBest regards,\nFinance & Operations"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790412013.6920094,
+      "duration_sec": 0.0,
+      "result": {
+        "success": true,
+        "sheet_name": "Invoice_Reconciliation",
+        "row_number": 1,
+        "data": {
+          "Row": 1,
+          "invoice_id": "INV-2026-001",
+          "customer_email": "sarah.c@techcorp.io",
+          "lead_id": "LEAD-101",
+          "reminder_body": "Dear Customer,\n\nThis is a notification that invoice INV-2026-001 of amount USD 4500.0 was due on 2026-09-15.\n\nPlease remit payment at your earliest convenience.\n\nBest regards,\nFinance & Operations",
+          "status": "Pending"
+        },
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [],
+  "cost_usd": 0.25
+}

@@ -1,0 +1,237 @@
+{
+  "workflow_id": "wf-5e130e72",
+  "goal": "Navigate to web portal, scrape hardware inventory records, enrich CRM lead LEAD-104, and submit onboarding form under mutated DOM",
+  "planner_mode": "LLM",
+  "planner_model": "groq:openai/gpt-oss-120b",
+  "start_time": 1790412073.187438,
+  "end_time": 1790412075.6836364,
+  "total_duration_sec": 2.496,
+  "status": "FAILED",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "name": "Fetch Lead LEAD-104",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_get_lead_by_id",
+      "parameters": {
+        "lead_id": "LEAD-104"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790412073.1894438,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790412073.1894438,
+      "duration_sec": 0.0,
+      "result": {
+        "found": true,
+        "lead": {
+          "id": "LEAD-104",
+          "name": "Priya Sharma",
+          "email": "psharma@solargrid.in",
+          "company": "SolarGrid India",
+          "score": 96,
+          "status": "QUALIFIED",
+          "deal_value": 110000,
+          "assigned_rep": "Elena Rostova",
+          "last_contact": "2026-09-24",
+          "notes": "Hardware inventory: [{\"SKU ID\": \"SKU-8812\", \"Product Title\": \"Industrial Optical Sensor Hub\", \"Inventory Status\": \"In Stock\", \"Price\": \"$1,450.00\"}, {\"SKU ID\": \"SKU-8813\", \"Product Title\": \"Edge Compute Node A100\", \"Inventory Status\": \"Low Stock (2 remaining)\", \"Price\": \"$9,800.00\"}]"
+        },
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-2",
+      "name": "Scrape Hardware Inventory",
+      "tool_type": "BROWSER",
+      "tool_name": "scrape_table",
+      "parameters": {
+        "url": "https://inventory.example.com/hardware",
+        "table_selector": "#inventory-table"
+      },
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "start_time": 1790412073.1894438,
+      "status": "SUCCESS",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790412075.0609314,
+      "duration_sec": 1.871,
+      "result": {
+        "rows": [
+          {
+            "SKU ID": "SKU-8812",
+            "Product Title": "Industrial Optical Sensor Hub",
+            "Inventory Status": "In Stock",
+            "Price": "$1,450.00"
+          },
+          {
+            "SKU ID": "SKU-8813",
+            "Product Title": "Edge Compute Node A100",
+            "Inventory Status": "Low Stock (2 remaining)",
+            "Price": "$9,800.00"
+          }
+        ],
+        "count": 2,
+        "engine": "PLAYWRIGHT"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-3",
+      "name": "Enrich Lead with Inventory Data",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "crm_update_lead",
+      "parameters": {
+        "lead_id": "{{step-1.result.lead.id}}",
+        "updates": {
+          "notes": "Hardware inventory: {{step-2.result.rows}}"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790412075.0609314,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790412075.0609314,
+          "level": "INFO",
+          "message": "Dataflow resolved 2 reference(s): step-3.lead_id='LEAD-104', step-3.updates.notes=[{'SKU ID': 'SKU-8812', 'Product Title': 'Industrial Optical Sensor Hub', 'Inventory Status': 'In Stock', 'Price': '$1,450.00'}, {'SKU ID': 'SKU-8813', 'Product Title': 'Edge Compute Node A100', 'Inventory Status': 'Low Stock (2 remaining)', 'Price': '$9,800.00'}]",
+          "metadata": {
+            "resolved": {
+              "step-3.lead_id": "LEAD-104",
+              "step-3.updates.notes": "[{'SKU ID': 'SKU-8812', 'Product Title': 'Industrial Optical Sensor Hub', 'Inventory Status': 'In Stock', 'Price': '$1,450.00'}, {'SKU ID': 'SKU-8813', 'Product Title': 'Edge Compute Node A100', 'Inventory Status': 'Low Stock (2 remaining)', 'Price': '$9,800.00'}]"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790412075.0609314,
+      "duration_sec": 0.0,
+      "result": {
+        "success": true,
+        "lead_id": "LEAD-104",
+        "updated_lead": {
+          "id": "LEAD-104",
+          "name": "Priya Sharma",
+          "email": "psharma@solargrid.in",
+          "company": "SolarGrid India",
+          "score": 96,
+          "status": "QUALIFIED",
+          "deal_value": 110000,
+          "assigned_rep": "Elena Rostova",
+          "last_contact": "2026-09-24",
+          "notes": "Hardware inventory: [{\"SKU ID\": \"SKU-8812\", \"Product Title\": \"Industrial Optical Sensor Hub\", \"Inventory Status\": \"In Stock\", \"Price\": \"$1,450.00\"}, {\"SKU ID\": \"SKU-8813\", \"Product Title\": \"Edge Compute Node A100\", \"Inventory Status\": \"Low Stock (2 remaining)\", \"Price\": \"$9,800.00\"}]"
+        },
+        "before": {
+          "id": "LEAD-104",
+          "name": "Priya Sharma",
+          "email": "psharma@solargrid.in",
+          "company": "SolarGrid India",
+          "score": 96,
+          "status": "QUALIFIED",
+          "deal_value": 110000,
+          "assigned_rep": "Elena Rostova",
+          "last_contact": "2026-09-24"
+        },
+        "_transport": "LOCAL_FALLBACK"
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-4",
+      "name": "Submit Onboarding Form",
+      "tool_type": "BROWSER",
+      "tool_name": "fill_form_and_click",
+      "parameters": {
+        "url": "https://portal.example.com/onboarding",
+        "form_data": {
+          "lead_id": "{{step-1.result.lead.id}}",
+          "lead_name": "{{step-1.result.lead.name}}",
+          "inventory_summary": "{{step-2.result.rows}}"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790412075.0609314,
+      "status": "SUCCESS",
+      "logs": [
+        {
+          "timestamp": 1790412075.0609314,
+          "level": "INFO",
+          "message": "Dataflow resolved 3 reference(s): step-4.form_data.lead_id='LEAD-104', step-4.form_data.lead_name='Priya Sharma', step-4.form_data.inventory_summary=[{'SKU ID': 'SKU-8812', 'Product Title': 'Industrial Optical Sensor Hub', 'Inventory Status': 'In Stock', 'Price': '$1,450.00'}, {'SKU ID': 'SKU-8813', 'Product Title': 'Edge Compute Node A100', 'Inventory Status': 'Low Stock (2 remaining)', 'Price': '$9,800.00'}]",
+          "metadata": {
+            "resolved": {
+              "step-4.form_data.lead_id": "LEAD-104",
+              "step-4.form_data.lead_name": "Priya Sharma",
+              "step-4.form_data.inventory_summary": "[{'SKU ID': 'SKU-8812', 'Product Title': 'Industrial Optical Sensor Hub', 'Inventory Status': 'In Stock', 'Price': '$1,450.00'}, {'SKU ID': 'SKU-8813', 'Product Title': 'Edge Compute Node A100', 'Inventory Status': 'Low Stock (2 remaining)', 'Price': '$9,800.00'}]"
+            }
+          }
+        }
+      ],
+      "retries": 0,
+      "end_time": 1790412075.6735003,
+      "duration_sec": 0.613,
+      "result": {
+        "success": true,
+        "self_healed": false,
+        "strategy": "EXACT_SELECTOR",
+        "engine": "PLAYWRIGHT",
+        "executed_selector": "#submit-lead-btn",
+        "filled_fields": [],
+        "clicked": true,
+        "click_error": null,
+        "dom_feedback": "Lead Submitted Successfully to Pipeline!",
+        "submitted_payload": {
+          "lead_id": "LEAD-104",
+          "lead_name": "Priya Sharma",
+          "inventory_summary": [
+            {
+              "SKU ID": "SKU-8812",
+              "Product Title": "Industrial Optical Sensor Hub",
+              "Inventory Status": "In Stock",
+              "Price": "$1,450.00"
+            },
+            {
+              "SKU ID": "SKU-8813",
+              "Product Title": "Edge Compute Node A100",
+              "Inventory Status": "Low Stock (2 remaining)",
+              "Price": "$9,800.00"
+            }
+          ]
+        },
+        "result_message": "Lead record submitted via real Chromium click."
+      },
+      "error": null
+    },
+    {
+      "step_id": "step-5",
+      "name": "Log Onboarding Completion",
+      "tool_type": "MCP_TOOL",
+      "tool_name": "sheets_append_row",
+      "parameters": {
+        "sheet_name": "OnboardingLog",
+        "row_data": {
+          "lead_id": "{{step-1.result.lead.id}}",
+          "form_submission_status": "{{step-4.result.success}}",
+          "timestamp": "{{step-4.result.timestamp}}"
+        }
+      },
+      "risk_level": "HIGH",
+      "requires_approval": false,
+      "start_time": 1790412075.6755083,
+      "status": "FAILED",
+      "logs": [],
+      "retries": 0,
+      "end_time": 1790412075.67712,
+      "duration_sec": 0.002,
+      "result": null,
+      "error": "Unresolved parameter reference '{{step-4.result.timestamp}}' in step 'step-5' (step-5.row_data.timestamp): no value in completed earlier steps ['step-1', 'step-2', 'step-3', 'step-4']. Reference upstream results, e.g. {{step-1.result.invoices[0].id}}."
+    }
+  ],
+  "self_healing_events": [],
+  "hitl_events": [],
+  "cost_usd": 0.25
+}
