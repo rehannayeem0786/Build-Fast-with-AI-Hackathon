@@ -298,7 +298,16 @@ function showHealingCascade(data) {
     card.classList.remove('hidden');
 
     const stages = ['LEARNED_MEMORY', 'EXACT_SELECTOR', 'SEMANTIC_TEXT_GROUNDING', 'ACCESSIBILITY_TREE_GROUNDING', 'FORM_PROXIMITY_HEURISTIC'];
-    const hitStrategy = data.healing_strategy || data.strategy || '';
+    // Strategy arrives nested in the step result (data.result.strategy); also accept
+    // top-level healing_strategy/strategy so either payload shape works.
+    const result = (data && typeof data.result === 'object' && data.result) || {};
+    const hitStrategy = String(
+        (data && (data.healing_strategy || data.strategy)) || result.strategy || ''
+    ).toUpperCase().replace(/ /g, '_');
+
+    // Index of the stage that actually resolved the element (-1 = unknown).
+    let hitIdx = stages.findIndex(s => hitStrategy.includes(s));
+    if (hitIdx === -1 && hitStrategy) hitIdx = stages.length - 1; // unknown strategy → final fallback
 
     stages.forEach((stage, i) => {
         const el = document.querySelector(`.healing-stage[data-stage="${i}"]`);
@@ -306,17 +315,21 @@ function showHealingCascade(data) {
         if (!el || !statusEl) return;
 
         setTimeout(() => {
-            if (hitStrategy.toUpperCase().replace(/ /g, '_').includes(stage) ||
-                (i === stages.length - 1 && hitStrategy)) {
+            el.classList.remove('hit', 'miss');
+            if (hitIdx === -1) {
+                statusEl.innerText = '—';
+                statusEl.style.color = 'var(--text-muted)';
+            } else if (i === hitIdx) {
                 el.classList.add('hit');
-                el.classList.remove('miss');
                 statusEl.innerText = '✓ HIT';
                 statusEl.style.color = 'var(--emerald)';
-            } else {
+            } else if (i < hitIdx) {
                 el.classList.add('miss');
-                el.classList.remove('hit');
                 statusEl.innerText = '✕ miss';
                 statusEl.style.color = 'var(--crimson)';
+            } else {
+                statusEl.innerText = 'skipped';
+                statusEl.style.color = 'var(--text-muted)';
             }
         }, i * 200);
     });

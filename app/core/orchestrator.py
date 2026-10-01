@@ -544,13 +544,17 @@ class WorkflowOrchestrator:
             step.status = StepStatus.SUCCESS
 
         telemetry.complete_step(dag.workflow_id, step, step.status, result=result)
-        await self.emit_event("STEP_COMPLETED", {
+        event_payload = {
             "workflow_id": dag.workflow_id,
             "step_id": step.id,
             "status": step.status.value,
             "duration_ms": step.duration_ms,
             "result": result,
-        })
+        }
+        if isinstance(result, dict) and result.get("self_healed"):
+            # Surface the winning cascade stage for the UI visualizer.
+            event_payload["healing_strategy"] = result.get("strategy")
+        await self.emit_event("STEP_COMPLETED", event_payload)
 
     async def _human_gate(
         self,
