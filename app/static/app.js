@@ -295,8 +295,6 @@ function updateStepStatus(stepId, status) {
 // ---- Self-Healing Cascade ----
 function showHealingCascade(data) {
     const card = document.getElementById('healing-card');
-    card.classList.remove('hidden');
-
     const stages = ['LEARNED_MEMORY', 'EXACT_SELECTOR', 'SEMANTIC_TEXT_GROUNDING', 'ACCESSIBILITY_TREE_GROUNDING', 'FORM_PROXIMITY_HEURISTIC'];
     // Strategy arrives nested in the step result (data.result.strategy); also accept
     // top-level healing_strategy/strategy so either payload shape works.
@@ -308,6 +306,10 @@ function showHealingCascade(data) {
     // Index of the stage that actually resolved the element (-1 = unknown).
     let hitIdx = stages.findIndex(s => hitStrategy.includes(s));
     if (hitIdx === -1 && hitStrategy) hitIdx = stages.length - 1; // unknown strategy → final fallback
+    // Never reveal the card without a known winning stage — a RECOVERED step is
+    // still credited in the metrics strip and DAG badge either way.
+    if (hitIdx === -1) return;
+    card.classList.remove('hidden');
 
     stages.forEach((stage, i) => {
         const el = document.querySelector(`.healing-stage[data-stage="${i}"]`);
@@ -316,10 +318,7 @@ function showHealingCascade(data) {
 
         setTimeout(() => {
             el.classList.remove('hit', 'miss');
-            if (hitIdx === -1) {
-                statusEl.innerText = '—';
-                statusEl.style.color = 'var(--text-muted)';
-            } else if (i === hitIdx) {
+            if (i === hitIdx) {
                 el.classList.add('hit');
                 statusEl.innerText = '✓ HIT';
                 statusEl.style.color = 'var(--emerald)';
